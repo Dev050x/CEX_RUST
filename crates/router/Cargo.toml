@@ -1,0 +1,16 @@
+[package]
+name = "router"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+actix-web = "4.13.0"
+bcrypt = "0.19.2"
+derive_more = { version = "2.1.1", features = ["display"] }
+env_logger = { workspace = true }
+jsonwebtoken = { version = "10.4.0", features = ["rust_crypto"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sqlx = {workspace = true}
+sqlx_postgres = { package = "db", path = "../db" }
+dotenvy = {workspace = true}
