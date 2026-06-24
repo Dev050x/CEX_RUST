@@ -22,7 +22,9 @@ pub enum CustomError {
     #[display("User already Exist")]
     UserExists,
     #[display("Wrong password")]
-    WrongPassword
+    WrongPassword,
+    #[display("wrong jwt token")]
+    WrongJwtToken,
 }
 
 impl ResponseError for CustomError {
@@ -33,7 +35,8 @@ impl ResponseError for CustomError {
             CustomError::JwtMissing => StatusCode::UNAUTHORIZED,
             CustomError::LoginFirst => StatusCode::UNAUTHORIZED,
             CustomError::UserExists => StatusCode::UNAUTHORIZED,
-            CustomError::WrongPassword => StatusCode::BAD_REQUEST
+            CustomError::WrongPassword => StatusCode::BAD_REQUEST,
+            CustomError::WrongJwtToken => StatusCode::UNAUTHORIZED,
         }
     }
 

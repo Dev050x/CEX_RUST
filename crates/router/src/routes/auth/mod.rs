@@ -39,13 +39,15 @@ pub async fn sign_in(
     if !is_correct {
         return Err(CustomError::WrongPassword);
     };
-    let jwt_secret = &app_state.jwt_secret.as_bytes();
+    let jwt_secret = std::env::var("JWT_SECRET").expect("jwt secret is missing");
+    let header = Header::default();
+    let encoding_key = EncodingKey::from_secret(jwt_secret.as_bytes());
     let jwt_token = encode(
-        &Header::default(),
+        &header,
         &Payload {
             user_id: user.id.to_string(),
         },
-        &EncodingKey::from_secret(jwt_secret),
+        &encoding_key,
     )
     .map_err(|_| CustomError::InternalError)?;
 
@@ -70,7 +72,6 @@ pub async fn sign_up(
     if user_exist.is_some() {
         return Err(CustomError::UserExists);
     }
-
     let hashed_pass = hash(data.password, DEFAULT_COST).map_err(|_| CustomError::InternalError)?;
     sqlx::query!(
         "INSERT INTO users (username, password) VALUES ($1, $2)",

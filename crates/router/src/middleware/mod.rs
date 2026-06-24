@@ -24,7 +24,6 @@ pub async fn my_custom_middleware(
         .collect();
 
     let jwt_token = token.get(1).copied().ok_or(CustomError::JwtMissing)?;
-    println!("jwt token is: {} ", jwt_token);
     let jwt_secret = std::env::var("JWT_SECRET").expect("jwt_secrete is missing");
 
     match verify_jwt(jwt_token, jwt_secret) {
@@ -45,12 +44,9 @@ pub fn verify_jwt(jwt_token: &str, jwt_secret: String) -> Option<Payload> {
     validation.required_spec_claims.remove("exp");
 
     let decoding_key = DecodingKey::from_secret(jwt_secret.as_bytes());
-    
 
     match decode::<Payload>(jwt_token, &decoding_key, &validation) {
-        Ok(token_data) => {
-            Some(token_data.claims)
-        }
+        Ok(token_data) => Some(token_data.claims),
         Err(err) => {
             println!("jwt error {:?} ", err);
             None

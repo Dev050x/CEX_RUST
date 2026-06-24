@@ -16,3 +16,6 @@ sqlx_postgres = { package = "db", path = "../db" }
 dotenvy = { workspace = true }
 types = { package = "types", path = "../types" }
 redis = { workspace = true }
+tokio ={ workspace = true}
+uuid = { version = "1.23.3", features = ["v4"] }
+dashmap = "6.2.1"
