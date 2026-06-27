@@ -1,4 +1,8 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
+
+use crate::user::UserBalance;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "msg")]
@@ -23,25 +27,40 @@ pub struct CreateOrderData {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "lowercase")]
-pub enum TypeOfOrder {
-    LIMIT,
-    MARKET,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
 pub struct OnRampData {
     pub user_id: String,
 }
 
+// Response TYPE -----------------------------------------------------------------------------------
 #[derive(Serialize, Deserialize, Debug)]
-pub struct EngineResponse {
-    pub correlation_id: String,
-    pub data: CreateOrderResponseData,
+#[serde(tag = "msg")]
+pub enum EngineResponse {
+    CreateOrder {
+        correlation_id: String,
+        data: CreateOrderResponseData,
+    },
+    OnRamp {
+        correlation_id: String,
+        data: OnRampResponseData,
+    },
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CreateOrderResponseData {
     pub user_id: String,
     pub filled: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct OnRampResponseData {
+    pub user_id: String,
+    pub balance: HashMap<String, UserBalance>
+}
+
+// Extra Type-----------------------------------------------------------------------------------
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "lowercase")]
+pub enum TypeOfOrder {
+    LIMIT,
+    MARKET,
 }

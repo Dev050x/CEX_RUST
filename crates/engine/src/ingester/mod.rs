@@ -1,10 +1,10 @@
 use redis::streams::StreamReadReply;
-use tokio::sync::mpsc::Sender;
+use tokio::sync::mpsc;
 use types::engine::EngineRequest;
 
 use crate::redis_manager::RedisManager;
 
-pub async fn ingester(tx: Sender<EngineRequest>) {
+pub async fn ingester(tx: mpsc::Sender<EngineRequest>) {
     let mut last_id = "0".to_string();
     loop {
         let Ok(result) = RedisManager::get_instance()

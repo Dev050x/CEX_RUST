@@ -22,15 +22,30 @@ pub async fn send_to_engine(
     let (tx, rx) = oneshot::channel();
     get_pending().insert(correlation_id, tx);
 
-    RedisManager::get_instance()
+    match RedisManager::get_instance()
         .await
         .publish_message(&payload)
         .await
-        .expect("msg");
+    {
+        Ok(_) => println!("published successfully"),
+        Err(e) => println!("publish error: {:?}", e),
+    }
 
-    let response = rx.await.map_err(|_| CustomError::InternalError)?;
+    let response = tokio::time::timeout(std::time::Duration::from_secs(5), rx)
+        .await
+        .map_err(|_| CustomError::TimeoutError)?
+        .map_err(|_| CustomError::InternalError)?;
 
-    Ok(HttpResponse::Ok().json(response))
+    match response {
+        EngineResponse::CreateOrder {
+            correlation_id: _,
+            data,
+        } => Ok(HttpResponse::Ok().json(data)),
+        EngineResponse::OnRamp {
+            correlation_id: _,
+            data,
+        } => Ok(HttpResponse::Ok().json(data)),
+    }
 }
 
 pub async fn listening_for_engine_response() {
@@ -48,7 +63,7 @@ pub async fn listening_for_engine_response() {
         let reply: StreamReadReply = match redis::from_redis_value(reply) {
             Ok(r) => r,
             Err(e) => {
-                println!("parse reply error: {:?}", e);
+                // println!("parse reply error: {:?}", e);
                 continue;
             }
         };
@@ -64,13 +79,25 @@ pub async fn listening_for_engine_response() {
                     };
 
                     match serde_json::from_str::<EngineResponse>(json_str) {
-                        Ok(response) => {
-                            println!("parsed response: {:?}", response);
-                            if let Some(tx) = get_pending().remove(&response.correlation_id) {
-                                tx.1.send(response).ok();
+                        Ok(response) => match &response {
+                            EngineResponse::CreateOrder {
+                                correlation_id,
+                                data: _,
+                            } => {
+                                if let Some(tx) = get_pending().remove(correlation_id) {
+                                    tx.1.send(response).ok();
+                                }
                             }
-                        }
-                        Err(e) => println!("json parse error: {:?}", e), 
+                            EngineResponse::OnRamp {
+                                correlation_id,
+                                data:_,
+                            } => {
+                                if let Some(tx) = get_pending().remove(correlation_id) {
+                                    tx.1.send(response).ok();
+                                }
+                            }
+                        },
+                        Err(e) => println!("json parse error: {:?}", e),
                     }
                 }
             }

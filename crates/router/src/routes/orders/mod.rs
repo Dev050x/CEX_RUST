@@ -1,11 +1,9 @@
 use actix_web::{HttpResponse, post, web};
-use serde_json::json;
-use types::engine::{CreateOrderData, EngineRequest};
+use types::engine::{CreateOrderData, EngineRequest, OnRampData};
 use uuid::Uuid;
 
 use crate::{
     error::CustomError,
-    redis::RedisManager,
     types::{app::AppState, order::CreateOrderSchema, user::Payload},
     utils::send_to_engine,
 };
@@ -29,6 +27,26 @@ pub async fn create_order(
     };
 
     let payload = EngineRequest::CreateOrder {
+        correlation_id: correlation_id.to_string(),
+        data: extra_payload,
+    };
+
+    send_to_engine(correlation_id.to_string(), payload).await
+}
+
+#[post("/onramp")]
+pub async fn onramp(
+    payload: web::ReqData<Payload>,
+    _app_state: web::Data<AppState>,
+) -> Result<HttpResponse, CustomError> {
+    let inner_payload = payload.into_inner();
+    let correlation_id = Uuid::new_v4();
+
+    let extra_payload = OnRampData {
+        user_id: inner_payload.user_id,
+    };
+
+    let payload = EngineRequest::OnRamp {
         correlation_id: correlation_id.to_string(),
         data: extra_payload,
     };

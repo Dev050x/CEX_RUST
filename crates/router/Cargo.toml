@@ -17,5 +17,5 @@ dotenvy = { workspace = true }
 types = { package = "types", path = "../types" }
 redis = { workspace = true }
 tokio ={ workspace = true}
-uuid = { version = "1.23.3", features = ["v4"] }
+uuid = { workspace = true}
 dashmap = "6.2.1"

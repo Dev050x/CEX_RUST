@@ -33,8 +33,7 @@ impl RedisManager {
 
     pub async fn get_instance() -> &'static RedisManager {
         REDIS_INSTANCE
-            .get_or_init(|| async { RedisManager::new().await })
-            .await
+            .get_or_init(|| async { RedisManager::new().await }).await
     }
 
     pub async fn publish_message(&self, data: &EngineResponse) -> redis::RedisResult<()> {

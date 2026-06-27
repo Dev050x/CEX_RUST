@@ -5,14 +5,13 @@ use types::engine::EngineRequest;
 
 pub struct RedisManager {
     publisher: redis::aio::MultiplexedConnection,
-    subscriber: redis::aio::MultiplexedConnection,
+    subscriber: redis::aio::MultiplexedConnection,  
 }
 
 static REDIS_INSTANCE: OnceCell<RedisManager> = OnceCell::const_new();
 
 impl RedisManager {
     async fn new() -> Self {
-        dotenvy::dotenv().ok();
         let redis_url = std::env::var("REDIS_URL").expect("redis url is missing");
         let publisher = Client::open(redis_url.clone())
             .unwrap()
@@ -32,9 +31,7 @@ impl RedisManager {
     }
 
     pub async fn get_instance() -> &'static RedisManager {
-        REDIS_INSTANCE
-            .get_or_init(|| async { RedisManager::new().await })
-            .await
+        REDIS_INSTANCE.get_or_init(|| async {RedisManager::new().await}).await
     }
 
     pub async fn publish_message(&self, data: &EngineRequest) -> redis::RedisResult<()> {
