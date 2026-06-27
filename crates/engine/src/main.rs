@@ -1,71 +1,25 @@
+mod ingester;
 mod redis_manager;
+mod router;
 
-use redis::streams::StreamReadReply;
-use types::engine::{CreateOrderResponseData, EngineRequest, EngineResponse};
+use tokio::sync::mpsc;
+use types::engine::EngineRequest;
 
-use crate::redis_manager::RedisManager;
+use crate::{ingester::ingester, router::router};
 
 #[tokio::main]
 async fn main() {
-    let mut last_id = "0".to_string();
-    loop {
-        let Ok(result) = RedisManager::get_instance()
-            .await
-            .read_message(&last_id)
-            .await
-        else {
-            continue;
-        };
+    let (tx, mut rx) = mpsc::channel::<EngineRequest>(1024);
 
-        let reply: StreamReadReply = redis::from_redis_value(result).unwrap();
-    
-        println!("data from the backend: {:?} ", reply);
-        for stream in reply.keys {
-            for entry in stream.ids {
-                last_id = entry.id.clone();
+    // ingester
+    tokio::spawn(async move {
+        ingester(tx).await;
+    });
 
-                if let Some(msg) = entry.map.get("message") {
-                    let json_str = match msg {
-                        redis::Value::BulkString(b) => std::str::from_utf8(b).unwrap(),
-                        _ => continue,
-                    };
+    //router
+    let router = tokio::spawn(async move {
+        router(rx).await;
+    });
 
-                    if let Ok(engine_request) = serde_json::from_str::<EngineRequest>(json_str) {
-                        match engine_request {
-                            EngineRequest::CreateOrder {
-                                correlation_id,
-                                data,
-                            } => {
-                                let engine_response = EngineResponse {
-                                    correlation_id,
-                                    data: CreateOrderResponseData {
-                                        user_id: data.user_id,
-                                        filled: "100".to_string(),
-                                    },
-                                };
-
-                                RedisManager::get_instance()
-                                    .await
-                                    .publish_message(&engine_response)
-                                    .await
-                                    .expect("publishing error form engine");
-                            }
-                            EngineRequest::OnRamp {
-                                correlation_id,
-                                data,
-                            } => {
-                                let engine_response = EngineResponse {
-                                    correlation_id,
-                                    data: CreateOrderResponseData {
-                                        user_id: data.user_id,
-                                        filled: "100".to_string(),
-                                    },
-                                };
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    router.await.unwrap();
 }
