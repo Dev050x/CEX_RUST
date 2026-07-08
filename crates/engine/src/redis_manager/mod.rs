@@ -1,7 +1,7 @@
 use dotenvy;
 use redis::{AsyncCommands, Client, Value};
 use tokio::sync::OnceCell;
-use types::engine::{EngineResponse};
+use types::engine::EngineResponse;
 
 pub struct RedisManager {
     publisher: redis::aio::MultiplexedConnection,
@@ -33,14 +33,14 @@ impl RedisManager {
 
     pub async fn get_instance() -> &'static RedisManager {
         REDIS_INSTANCE
-            .get_or_init(|| async { RedisManager::new().await }).await
+            .get_or_init(|| async { RedisManager::new().await })
+            .await
     }
 
     pub async fn publish_message(&self, data: &EngineResponse) -> redis::RedisResult<()> {
         let payload = serde_json::to_string(data).unwrap();
         let mut conn = self.publisher.clone();
-        conn.xadd("to-backend", "*", &[("message", payload)])
-            .await
+        conn.xadd("to-backend", "*", &[("message", payload)]).await
     }
 
     pub async fn read_message(&self, last_id: &String) -> redis::RedisResult<Value> {
@@ -48,7 +48,6 @@ impl RedisManager {
             .block(0)
             .count(1);
         let mut conn = self.subscriber.clone();
-        conn.xread_options(&["to-engine"], &[last_id], &opts)
-            .await
+        conn.xread_options(&["to-engine"], &[last_id], &opts).await
     }
 }

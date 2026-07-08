@@ -67,7 +67,7 @@ pub async fn sign_up(
     let user_exist = sqlx::query!("SELECT id FROM users WHERE username = $1", &data.username)
         .fetch_optional(&app_state.pool)
         .await
-        .map_err(|_| CustomError::InternalError)?;
+        .map_err(|_| CustomError::DBError)?;
 
     if user_exist.is_some() {
         return Err(CustomError::UserExists);

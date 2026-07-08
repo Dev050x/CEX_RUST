@@ -17,7 +17,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
                 web::scope("")
                     .wrap(from_fn(my_custom_middleware))
                     .service(orders::onramp)
-                    .service(orders::create_order)
+                    .service(orders::create_order),
             ),
     );
 }

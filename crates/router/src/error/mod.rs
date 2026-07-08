@@ -26,7 +26,9 @@ pub enum CustomError {
     #[display("wrong jwt token")]
     WrongJwtToken,
     #[display("TimeoutError")]
-    TimeoutError
+    TimeoutError,
+    #[display("There is some errro in DB connection")]
+    DBError,
 }
 
 impl ResponseError for CustomError {
@@ -39,7 +41,8 @@ impl ResponseError for CustomError {
             CustomError::UserExists => StatusCode::UNAUTHORIZED,
             CustomError::WrongPassword => StatusCode::BAD_REQUEST,
             CustomError::WrongJwtToken => StatusCode::UNAUTHORIZED,
-            CustomError::TimeoutError => StatusCode::REQUEST_TIMEOUT
+            CustomError::TimeoutError => StatusCode::REQUEST_TIMEOUT,
+            CustomError::DBError => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 

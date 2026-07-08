@@ -22,8 +22,9 @@ pub async fn create_order(
         market: body.market,
         qty: body.qty,
         price: body.price,
-        type_of_order: body.type_of_order,
+        r#type: body.r#type,
         user_id: inner_payload.user_id,
+        side: body.side,
     };
 
     let payload = EngineRequest::CreateOrder {

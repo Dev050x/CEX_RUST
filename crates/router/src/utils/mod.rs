@@ -8,7 +8,6 @@ use types::engine::{EngineRequest, EngineResponse};
 use crate::{error::CustomError, redis::RedisManager};
 
 type PendingMap = DashMap<String, oneshot::Sender<EngineResponse>>;
-
 static PENDING: OnceLock<PendingMap> = OnceLock::new();
 
 pub fn get_pending() -> &'static PendingMap {
@@ -90,7 +89,7 @@ pub async fn listening_for_engine_response() {
                             }
                             EngineResponse::OnRamp {
                                 correlation_id,
-                                data:_,
+                                data: _,
                             } => {
                                 if let Some(tx) = get_pending().remove(correlation_id) {
                                     tx.1.send(response).ok();

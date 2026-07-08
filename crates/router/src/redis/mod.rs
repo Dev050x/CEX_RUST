@@ -1,11 +1,10 @@
-use dotenvy;
 use redis::{AsyncCommands, Client, Value};
 use tokio::sync::OnceCell;
 use types::engine::EngineRequest;
 
 pub struct RedisManager {
     publisher: redis::aio::MultiplexedConnection,
-    subscriber: redis::aio::MultiplexedConnection,  
+    subscriber: redis::aio::MultiplexedConnection,
 }
 
 static REDIS_INSTANCE: OnceCell<RedisManager> = OnceCell::const_new();
@@ -31,14 +30,15 @@ impl RedisManager {
     }
 
     pub async fn get_instance() -> &'static RedisManager {
-        REDIS_INSTANCE.get_or_init(|| async {RedisManager::new().await}).await
+        REDIS_INSTANCE
+            .get_or_init(|| async { RedisManager::new().await })
+            .await
     }
 
     pub async fn publish_message(&self, data: &EngineRequest) -> redis::RedisResult<()> {
         let payload = serde_json::to_string(data).unwrap();
         let mut conn = self.publisher.clone();
-        conn.xadd("to-engine", "*", &[("message", payload)])
-            .await
+        conn.xadd("to-engine", "*", &[("message", payload)]).await
     }
 
     pub async fn read_message(&self, last_id: &String) -> redis::RedisResult<Value> {
@@ -46,7 +46,6 @@ impl RedisManager {
             .block(0)
             .count(1);
         let mut conn = self.subscriber.clone();
-        conn.xread_options(&["to-backend"], &[last_id], &opts)
-            .await
+        conn.xread_options(&["to-backend"], &[last_id], &opts).await
     }
 }

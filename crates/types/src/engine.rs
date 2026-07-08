@@ -22,8 +22,9 @@ pub struct CreateOrderData {
     pub market: String,
     pub qty: String,
     pub price: Option<String>,
-    pub type_of_order: TypeOfOrder,
+    pub r#type: TypeOfOrder,
     pub user_id: String,
+    pub side: Side,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -49,12 +50,13 @@ pub enum EngineResponse {
 pub struct CreateOrderResponseData {
     pub user_id: String,
     pub filled: String,
+    pub msg: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct OnRampResponseData {
     pub user_id: String,
-    pub balance: HashMap<String, UserBalance>
+    pub balance: HashMap<String, UserBalance>,
 }
 
 // Extra Type-----------------------------------------------------------------------------------
@@ -63,4 +65,11 @@ pub struct OnRampResponseData {
 pub enum TypeOfOrder {
     LIMIT,
     MARKET,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "lowercase")]
+pub enum Side {
+    BUY,
+    SELL,
 }
