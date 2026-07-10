@@ -3,7 +3,7 @@ use tokio::sync::mpsc;
 use types::{engine::EngineRequest, user::UserBalance};
 
 use crate::{
-    internal_types::{TxChannels}, ops::{create_order::handle_create_order, onramp::handle_onramp},
+    messages::{TxChannels}, services::{create_order::handle_create_order, onramp::handle_onramp},
 };
 
 pub async fn balance(mut rx_router: mpsc::Receiver<EngineRequest>, mut channels: TxChannels) {

@@ -1,13 +1,11 @@
 use std::collections::HashMap;
 
 use types::{
-    engine::{CreateOrderData, CreateOrderResponseData, EngineResponse, Side},
-    user::UserBalance,
+    engine::{CreateOrderData, Side, Trade}, user::UserBalance,
 };
 
 use crate::{
-    internal_types::{Order, TxChannels},
-    redis_manager::RedisManager,
+    messages::{TxChannels, types::Order}, utils::send_create_order_response,
 };
 
 pub async fn handle_create_order(
@@ -17,11 +15,13 @@ pub async fn handle_create_order(
     channels: &TxChannels,
 ) {
     let Some(user_balances) = balances.get_mut(&data.user_id) else {
-        send_response(
+        send_create_order_response(
             correlation_id,
             data.user_id,
             0.to_string(),
             "Please buy asset first".to_string(),
+            Vec::new(),
+            None,
         )
         .await;
         return;
@@ -43,11 +43,13 @@ pub async fn handle_create_order(
             let qty = data.qty.parse::<u64>().unwrap()
                 * data.price.as_ref().unwrap().parse::<u64>().unwrap();
             if qty < user_usdt_balance {
-                send_response(
+                send_create_order_response(
                     correlation_id,
                     data.user_id,
                     0.to_string(),
                     "user does not have enough usdt".to_string(),
+                    Vec::new(),
+                    None
                 )
                 .await;
                 return;
@@ -70,11 +72,13 @@ pub async fn handle_create_order(
         Side::SELL => {
             let qty = data.qty.parse::<u64>().unwrap();
             if qty < user_asset_balance {
-                send_response(
+                send_create_order_response(
                     correlation_id,
                     data.user_id,
                     0.to_string(),
                     "user does not have enough asset".to_string(),
+                    Vec::new(),
+                    None
                 )
                 .await;
                 return;
@@ -97,20 +101,6 @@ pub async fn handle_create_order(
     }
 }
 
-async fn send_response(correlation_id: String, user_id: String, filled: String, msg: String) {
-    let _ = RedisManager::get_instance()
-        .await
-        .publish_message(&EngineResponse::CreateOrder {
-            correlation_id,
-            data: CreateOrderResponseData {
-                user_id: user_id,
-                filled,
-                msg,
-            },
-        })
-        .await;
-    return;
-}
 
 async fn send_to_orderbook(order: Order, channels: &TxChannels) {
     let tx = match order.data.market.as_str() {

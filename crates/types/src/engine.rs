@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap, VecDeque};
 
 use serde::{Deserialize, Serialize};
 
@@ -51,6 +51,8 @@ pub struct CreateOrderResponseData {
     pub user_id: String,
     pub filled: String,
     pub msg: String,
+    pub trades: Vec<Trade>,
+    pub order_id: Option<String>
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -72,4 +74,51 @@ pub enum TypeOfOrder {
 pub enum Side {
     BUY,
     SELL,
+}
+
+pub enum Market {
+    BTC,
+    ETH,
+    SOL
+}
+
+
+// Orderbook -----------------------------------------------------------------------------------    
+pub struct Orderbook{
+    pub bids: BTreeMap<u64, RestingOrder>,
+    pub asks: BTreeMap<u64, RestingOrder>,
+    pub last_traded_price: u64,
+}
+
+pub struct RestingOrder{
+    pub available_qty : u64,
+    pub orders: VecDeque<Orders>
+}
+
+pub struct Orders {
+    pub order_id: String,
+    pub user_id: String,
+    pub market: String,
+    pub side: Side,
+    pub qty: u64,
+    pub r#type: TypeOfOrder,
+    pub price: u64,
+    pub status: OrderStatus
+}
+
+pub enum OrderStatus {
+    OPEN,
+    PartialyFilled,
+    FILLED,
+    CANCEL
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Trade {
+    pub maker_order_id: String,
+    pub taker_order_id: String,
+    pub maker_user_id: String,
+    pub taker_user_id: String,
+    pub fill_qty: u64,
+    pub price: u64
 }

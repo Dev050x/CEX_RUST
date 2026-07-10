@@ -1,6 +1,8 @@
 use tokio::sync::mpsc;
 
-use types::engine::CreateOrderData;
+use crate::messages::types::Order;
+
+pub mod types;
 
 pub struct Channels {
     pub btc_channel: (mpsc::Sender<Order>, mpsc::Receiver<Order>),
@@ -20,7 +22,3 @@ pub struct RxChannels {
     pub rx_eth_channel: mpsc::Receiver<Order>
 }
 
-pub struct Order {
-    pub correlation_id: String,
-    pub data: CreateOrderData,
-}

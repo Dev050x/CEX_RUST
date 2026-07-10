@@ -1,15 +1,22 @@
 mod balance;
 mod ingester;
-mod internal_types;
-mod ops;
-mod redis_manager;
+mod market;
+mod matching;
+mod messages;
 mod router;
+mod services;
+mod store;
+mod utils;
 
 use tokio::sync::mpsc;
-use types::engine::EngineRequest;
+use types::engine::{EngineRequest, Market};
 
 use crate::{
-    balance::balance, ingester::ingester, internal_types::{Channels, Order, RxChannels, TxChannels}, router::router,
+    balance::balance,
+    ingester::ingester,
+    market::run_market,
+    messages::{Channels, RxChannels, TxChannels, types::Order},
+    router::router,
 };
 
 #[tokio::main]
@@ -48,6 +55,17 @@ async fn main() {
     //balance
     tokio::spawn(async move {
         balance(rx_router, txChannels).await;
+    });
+
+    //market
+    tokio::spawn(async move {
+        run_market(Market::BTC, rxChannels.rx_btc_channel).await;
+    });
+    tokio::spawn(async move {
+        run_market(Market::ETH, rxChannels.rx_eth_channel).await;
+    });
+    tokio::spawn(async move {
+        run_market(Market::SOL, rxChannels.rx_sol_channel).await;
     });
 
     router.await.unwrap();

@@ -1,4 +1,4 @@
-use crate::redis_manager::RedisManager;
+use crate::store::RedisManager;
 use std::collections::HashMap;
 use types::{
     engine::{EngineResponse, OnRampData, OnRampResponseData},
