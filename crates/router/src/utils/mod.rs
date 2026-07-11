@@ -34,6 +34,8 @@ pub async fn send_to_engine(
         .await
         .map_err(|_| CustomError::TimeoutError)?
         .map_err(|_| CustomError::InternalError)?;
+    
+    get_pending().remove(&correlation_id); 
 
     match response {
         EngineResponse::CreateOrder {
