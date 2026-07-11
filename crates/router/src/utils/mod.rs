@@ -62,7 +62,7 @@ pub async fn listening_for_engine_response() {
         let reply: StreamReadReply = match redis::from_redis_value(reply) {
             Ok(r) => r,
             Err(e) => {
-                // println!("parse reply error: {:?}", e);
+                println!("parse reply error: {:?}", e);
                 continue;
             }
         };

@@ -10,17 +10,18 @@ pub async fn send_create_order_response(
     trades: Vec<Trade>,
     order_id: Option<String>
 ) {
+    println!("sending the response {:?} \new", msg);
     let _ = RedisManager::get_instance()
         .await
         .publish_message(&EngineResponse::CreateOrder {
             correlation_id,
             data: CreateOrderResponseData {
                 user_id: user_id,
+                order_id,
+                trades: trades,
                 filled,
                 msg,
-                trades: trades,
-                order_id
-            },
+            }
         })
         .await;
     return;

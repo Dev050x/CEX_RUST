@@ -3,6 +3,7 @@ use std::num::ParseIntError;
 use types::engine::{CreateOrderData, OrderStatus, Side, TypeOfOrder};
 use uuid::Uuid;
 
+#[derive(Debug)]
 pub struct Order {
     pub correlation_id: String,
     pub data: CreateOrderData,
@@ -34,4 +35,18 @@ impl TryFrom<CreateOrderData> for OrderData {
             status: OrderStatus::OPEN
         })
     }
+}
+
+
+pub struct UpdateBalance {
+    pub user_id: String,
+    pub asset: String,
+    pub available_balance: Option<BalanceOps>,
+    pub locked_balance: Option<BalanceOps>,
+    pub reserved_balance: Option<BalanceOps>
+}
+
+pub enum BalanceOps {
+    Increase(u64),
+    Decrease(u64)
 }

@@ -6,6 +6,7 @@ pub async fn router(
     tx_router: mpsc::Sender<EngineRequest>,
 ) {
     while let Some(msg) = rx_ingest.recv().await {
+        println!("router got your request: {:?} \new_v4", msg);
         let _ = tx_router.send(msg).await;
     }
 }

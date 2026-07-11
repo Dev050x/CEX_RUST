@@ -5,14 +5,14 @@ use types::{
 };
 
 use crate::{
-    messages::{TxChannels, types::Order}, utils::send_create_order_response,
+    messages::{TxChannelsBalance, types::Order}, utils::send_create_order_response,
 };
 
 pub async fn handle_create_order(
     correlation_id: String,
     data: CreateOrderData,
     balances: &mut HashMap<String, HashMap<String, UserBalance>>,
-    channels: &TxChannels,
+    channels_balance: &TxChannelsBalance,
 ) {
     let Some(user_balances) = balances.get_mut(&data.user_id) else {
         send_create_order_response(
@@ -31,10 +31,12 @@ pub async fn handle_create_order(
         .get(&String::from("USDT"))
         .unwrap()
         .available_balance;
+    println!("user usdt balance {:?} ", user_usdt_balance);
     let user_asset_balance = user_balances
         .get(&String::from(&data.market))
         .unwrap()
         .available_balance;
+    println!("user asset balance {:?} ", user_asset_balance);
 
     // check user have enough balance
     // TODO: get avg price for market price(still remain)
@@ -42,7 +44,8 @@ pub async fn handle_create_order(
         Side::BUY => {
             let qty = data.qty.parse::<u64>().unwrap()
                 * data.price.as_ref().unwrap().parse::<u64>().unwrap();
-            if qty < user_usdt_balance {
+            println!("required usdt {:?} ", qty);
+            if user_usdt_balance < qty {
                 send_create_order_response(
                     correlation_id,
                     data.user_id,
@@ -64,14 +67,14 @@ pub async fn handle_create_order(
                         correlation_id,
                         data,
                     },
-                    channels,
+                    channels_balance,
                 )
                 .await;
             }
         }
         Side::SELL => {
             let qty = data.qty.parse::<u64>().unwrap();
-            if qty < user_asset_balance {
+            if user_asset_balance < qty {
                 send_create_order_response(
                     correlation_id,
                     data.user_id,
@@ -93,7 +96,7 @@ pub async fn handle_create_order(
                         correlation_id,
                         data,
                     },
-                    channels,
+                    channels_balance,
                 )
                 .await;
             }
@@ -102,7 +105,7 @@ pub async fn handle_create_order(
 }
 
 
-async fn send_to_orderbook(order: Order, channels: &TxChannels) {
+async fn send_to_orderbook(order: Order, channels: &TxChannelsBalance) {
     let tx = match order.data.market.as_str() {
         "BTC" => &channels.btc,
         "SOL" => &channels.sol,

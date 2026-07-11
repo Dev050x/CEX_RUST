@@ -2,10 +2,12 @@ use crate::store::RedisManager;
 use std::collections::HashMap;
 use types::{
     engine::{EngineResponse, OnRampData, OnRampResponseData},
-    user::UserBalance,
+    user::{self, UserBalance},
 };
 
-const AVAILABLE_BALANCE: [&'static str; 2] = ["SOL", "ETH"];
+const AVAILABLE_BALANCE: [&'static str; 4] = ["BTC", "SOL", "ETH", "USDT"];
+const HARD_CODED_USER_1: &'static str = "582c5432-d357-469d-8a18-9081f9d0762c";
+const HARD_CODED_USER_2: &'static str = "db47313c-b40f-4c68-8ccd-c50b592b1241";
 
 pub async fn handle_onramp(
     correlation_id: String,
@@ -22,6 +24,28 @@ pub async fn handle_onramp(
             locked_balance: 0,
             reserve_balance: 0,
         });
+    }
+
+    if data.user_id == HARD_CODED_USER_1.to_string() {
+        user_assets.insert(
+            "USDT".to_string(),
+            UserBalance {
+                available_balance: 10000,
+                locked_balance: 0,
+                reserve_balance: 0,
+            },
+        );
+    }
+
+    if data.user_id == HARD_CODED_USER_2.to_string() {
+        user_assets.insert(
+            "ETH".to_string(),
+            UserBalance {
+                available_balance: 10,
+                locked_balance: 0,
+                reserve_balance: 0,
+            },
+        );
     }
 
     let _ = RedisManager::get_instance()

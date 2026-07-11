@@ -52,7 +52,7 @@ pub struct CreateOrderResponseData {
     pub filled: String,
     pub msg: String,
     pub trades: Vec<Trade>,
-    pub order_id: Option<String>
+    pub order_id: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -70,29 +70,28 @@ pub enum TypeOfOrder {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "lowercase")]
 pub enum Side {
     BUY,
     SELL,
 }
 
+#[derive(Debug)]
 pub enum Market {
     BTC,
     ETH,
-    SOL
+    SOL,
 }
 
-
-// Orderbook -----------------------------------------------------------------------------------    
-pub struct Orderbook{
+// Orderbook -----------------------------------------------------------------------------------
+pub struct Orderbook {
     pub bids: BTreeMap<u64, RestingOrder>,
     pub asks: BTreeMap<u64, RestingOrder>,
     pub last_traded_price: u64,
 }
 
-pub struct RestingOrder{
-    pub available_qty : u64,
-    pub orders: VecDeque<Orders>
+pub struct RestingOrder {
+    pub available_qty: u64,
+    pub orders: VecDeque<Orders>,
 }
 
 pub struct Orders {
@@ -103,14 +102,14 @@ pub struct Orders {
     pub qty: u64,
     pub r#type: TypeOfOrder,
     pub price: u64,
-    pub status: OrderStatus
+    pub status: OrderStatus,
 }
 
 pub enum OrderStatus {
     OPEN,
     PartialyFilled,
     FILLED,
-    CANCEL
+    CANCEL,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -120,5 +119,5 @@ pub struct Trade {
     pub maker_user_id: String,
     pub taker_user_id: String,
     pub fill_qty: u64,
-    pub price: u64
+    pub price: u64,
 }

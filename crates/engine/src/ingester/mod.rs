@@ -16,7 +16,7 @@ pub async fn ingester(tx_ingest: mpsc::Sender<EngineRequest>) {
         };
 
         let reply: StreamReadReply = redis::from_redis_value(result).unwrap();
-        // println!("data from the backend: {:?} ", reply);
+        println!("ingester got your request: {:?} \new", reply);
 
         for stream in reply.keys {
             for entry in stream.ids {
