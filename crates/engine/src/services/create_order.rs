@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use types::{
-    engine::{CreateOrderData, Side, Trade}, user::UserBalance,
+    engine::{CreateOrderData, Side}, user::UserBalance,
 };
 
 use crate::{
@@ -104,9 +104,9 @@ pub async fn handle_create_order(
 
 async fn send_to_orderbook(order: Order, channels: &TxChannels) {
     let tx = match order.data.market.as_str() {
-        "BTC" => &channels.tx_btc_channel,
-        "SOL" => &channels.tx_sol_channel,
-        "ETH" => &channels.tx_eth_channel,
+        "BTC" => &channels.btc,
+        "SOL" => &channels.sol,
+        "ETH" => &channels.eth,
         _ => {
             println!("no matching asset");
             return;

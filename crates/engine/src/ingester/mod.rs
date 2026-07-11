@@ -4,7 +4,7 @@ use types::engine::EngineRequest;
 
 use crate::store::RedisManager;
 
-pub async fn ingester(tx: mpsc::Sender<EngineRequest>) {
+pub async fn ingester(tx_ingest: mpsc::Sender<EngineRequest>) {
     let mut last_id = "0".to_string();
     loop {
         let Ok(result) = RedisManager::get_instance()
@@ -29,7 +29,7 @@ pub async fn ingester(tx: mpsc::Sender<EngineRequest>) {
                     };
 
                     if let Ok(engine_request) = serde_json::from_str::<EngineRequest>(json_str) {
-                        let _ = tx.send(engine_request).await;
+                        let _ = tx_ingest.send(engine_request).await;
                     }
                 }
             }

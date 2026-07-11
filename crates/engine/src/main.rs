@@ -25,21 +25,21 @@ async fn main() {
     let (tx_router, rx_router) = mpsc::channel::<EngineRequest>(1024);
 
     let channels = Channels {
-        eth_channel: mpsc::channel::<Order>(1024),
-        btc_channel: mpsc::channel::<Order>(1024),
-        sol_channel: mpsc::channel::<Order>(1024),
+        btc: mpsc::channel::<Order>(1024),
+        eth: mpsc::channel::<Order>(1024),
+        sol: mpsc::channel::<Order>(1024),
     };
 
-    let txChannels = TxChannels {
-        tx_btc_channel: channels.btc_channel.0,
-        tx_sol_channel: channels.sol_channel.0,
-        tx_eth_channel: channels.eth_channel.0,
+    let tx_channels = TxChannels {
+        btc: channels.btc.0,
+        sol: channels.sol.0,
+        eth: channels.eth.0,
     };
 
-    let rxChannels = RxChannels {
-        rx_btc_channel: channels.btc_channel.1,
-        rx_sol_channel: channels.sol_channel.1,
-        rx_eth_channel: channels.eth_channel.1,
+    let rx_channels = RxChannels {
+        btc: channels.btc.1,
+        sol: channels.sol.1,
+        eth: channels.eth.1,
     };
 
     // ingester
@@ -54,18 +54,18 @@ async fn main() {
 
     //balance
     tokio::spawn(async move {
-        balance(rx_router, txChannels).await;
+        balance(rx_router, tx_channels).await;
     });
 
     //market
     tokio::spawn(async move {
-        run_market(Market::BTC, rxChannels.rx_btc_channel).await;
+        run_market(Market::BTC, rx_channels.btc).await;
     });
     tokio::spawn(async move {
-        run_market(Market::ETH, rxChannels.rx_eth_channel).await;
+        run_market(Market::ETH, rx_channels.eth).await;
     });
     tokio::spawn(async move {
-        run_market(Market::SOL, rxChannels.rx_sol_channel).await;
+        run_market(Market::SOL, rx_channels.sol).await;
     });
 
     router.await.unwrap();

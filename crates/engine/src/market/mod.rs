@@ -8,7 +8,7 @@ use crate::{
     utils::send_create_order_response,
 };
 
-pub async fn run_market(market: Market, mut rx_channel: mpsc::Receiver<Order>) {
+pub async fn run_market(_market: Market, mut rx_channel: mpsc::Receiver<Order>) {
     let mut orderbook = Orderbook {
         bids: BTreeMap::new(),
         asks: BTreeMap::new(),

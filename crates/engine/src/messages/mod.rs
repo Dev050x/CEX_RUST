@@ -5,20 +5,20 @@ use crate::messages::types::Order;
 pub mod types;
 
 pub struct Channels {
-    pub btc_channel: (mpsc::Sender<Order>, mpsc::Receiver<Order>),
-    pub eth_channel: (mpsc::Sender<Order>, mpsc::Receiver<Order>),
-    pub sol_channel: (mpsc::Sender<Order>, mpsc::Receiver<Order>),
+    pub btc: (mpsc::Sender<Order>, mpsc::Receiver<Order>),
+    pub eth: (mpsc::Sender<Order>, mpsc::Receiver<Order>),
+    pub sol: (mpsc::Sender<Order>, mpsc::Receiver<Order>),
 }
 
 pub struct TxChannels {
-    pub tx_btc_channel: mpsc::Sender<Order>,
-    pub tx_sol_channel: mpsc::Sender<Order>,
-    pub tx_eth_channel: mpsc::Sender<Order>
+    pub btc: mpsc::Sender<Order>,
+    pub sol: mpsc::Sender<Order>,
+    pub eth: mpsc::Sender<Order>
 }
 
 pub struct RxChannels {
-    pub rx_btc_channel: mpsc::Receiver<Order>,
-    pub rx_sol_channel: mpsc::Receiver<Order>,
-    pub rx_eth_channel: mpsc::Receiver<Order>
+    pub btc: mpsc::Receiver<Order>,
+    pub sol: mpsc::Receiver<Order>,
+    pub eth: mpsc::Receiver<Order>
 }
 
