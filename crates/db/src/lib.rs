@@ -1,4 +1,4 @@
-use sqlx::{Pool, Postgres, postgres::PgPoolOptions};
+use sqlx::{Pool, Postgres, migrate::MigrateDatabase, postgres::PgPoolOptions};
 
 pub struct PostgresDb {
     pool: Pool<Postgres>,
@@ -15,19 +15,7 @@ impl PostgresDb {
 
         println!("DB connected");
 
-        sqlx::query(
-            r#"
-                CREATE TABLE IF NOT EXISTS users (
-                    id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
-                    username TEXT NOT NULL UNIQUE,
-                    password TEXT NOT NULL,
-                    created_at TIMESTAMPTZ NOT NULL DEFAULT now (),
-                    updated_at TIMESTAMPTZ NOT NULL DEFAULT now ()
-                );
-            "#,
-        )
-        .execute(&pool)
-        .await?;
+        sqlx::migrate!("../../migrations").run(&pool).await?;
 
         return Ok(Self { pool: pool });
     }
