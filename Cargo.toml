@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/router", "crates/db", "crates/types", "crates/engine"]
+members = ["crates/router", "crates/db", "crates/types", "crates/engine", "crates/db-poller"]
 
 [workspace.dependencies]
 dotenvy = "0.15.7"
