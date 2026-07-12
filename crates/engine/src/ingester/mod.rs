@@ -5,7 +5,7 @@ use types::engine::EngineRequest;
 use crate::store::RedisManager;
 
 pub async fn ingester(tx_ingest: mpsc::Sender<EngineRequest>) {
-    let mut last_id = "0".to_string();
+    let mut last_id = "$".to_string();
     loop {
         let Ok(result) = RedisManager::get_instance()
             .await

@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use dotenvy;
 use redis::{AsyncCommands, Client, Value};
 use tokio::sync::OnceCell;
@@ -14,6 +16,8 @@ impl RedisManager {
     async fn new() -> Self {
         dotenvy::dotenv().ok();
         let redis_url = std::env::var("REDIS_URL").expect("redis url is missing");
+        let config =
+            redis::AsyncConnectionConfig::new().set_response_timeout(Some(Duration::from_secs(10)));
         let publisher = Client::open(redis_url.clone())
             .unwrap()
             .get_multiplexed_async_connection()
@@ -21,7 +25,7 @@ impl RedisManager {
             .unwrap();
         let subscriber = Client::open(redis_url)
             .unwrap()
-            .get_multiplexed_async_connection()
+            .get_multiplexed_async_connection_with_config(&config)
             .await
             .unwrap();
         println!("connected with Redis");

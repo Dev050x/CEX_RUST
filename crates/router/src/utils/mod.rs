@@ -19,7 +19,7 @@ pub async fn send_to_engine(
     payload: EngineRequest,
 ) -> Result<HttpResponse, CustomError> {
     let (tx, rx) = oneshot::channel();
-    get_pending().insert(correlation_id, tx);
+    get_pending().insert(correlation_id.clone(), tx);
 
     match RedisManager::get_instance()
         .await
@@ -34,7 +34,7 @@ pub async fn send_to_engine(
         .await
         .map_err(|_| CustomError::TimeoutError)?
         .map_err(|_| CustomError::InternalError)?;
-    
+
     get_pending().remove(&correlation_id); 
 
     match response {
@@ -50,7 +50,7 @@ pub async fn send_to_engine(
 }
 
 pub async fn listening_for_engine_response() {
-    let mut last_id = "0".to_string();
+    let mut last_id = "$".to_string();
 
     loop {
         let Ok(reply) = RedisManager::get_instance()

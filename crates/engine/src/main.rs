@@ -17,6 +17,7 @@ use crate::{
 
 #[tokio::main]
 async fn main() {
+    dotenvy::dotenv().ok();
     let (tx_ingest, rx_ingest) = mpsc::channel::<EngineRequest>(1024);
     let (tx_router, rx_router) = mpsc::channel::<EngineRequest>(1024);
 
