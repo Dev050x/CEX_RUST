@@ -9,6 +9,7 @@ pub struct Order {
     pub data: CreateOrderData,
 }
 
+#[derive(Clone)]
 pub struct OrderData {
     pub market: String,
     pub qty: u64,

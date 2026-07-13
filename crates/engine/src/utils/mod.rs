@@ -1,14 +1,16 @@
-use types::engine::{CreateOrderResponseData, EngineResponse, Trade};
+use types::engine::{CreateOrderData, CreateOrderResponseData, EngineResponse, OrderStatus, Trade};
 
 use crate::store::RedisManager;
 
 pub async fn send_create_order_response(
     correlation_id: String,
     user_id: String,
+    order_id: Option<String>,
     filled: String,
     msg: String,
     trades: Vec<Trade>,
-    order_id: Option<String>
+    status: OrderStatus,
+    order: CreateOrderData
 ) {
     println!("sending the response {:?} \new", msg);
     let _ = RedisManager::get_instance()
@@ -21,6 +23,8 @@ pub async fn send_create_order_response(
                 trades: trades,
                 filled,
                 msg,
+                status,
+                order
             }
         })
         .await;

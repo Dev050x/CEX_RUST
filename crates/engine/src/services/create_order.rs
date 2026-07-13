@@ -1,11 +1,13 @@
 use std::collections::HashMap;
 
 use types::{
-    engine::{CreateOrderData, Side}, user::UserBalance,
+    engine::{CreateOrderData, Side},
+    user::UserBalance,
 };
 
 use crate::{
-    messages::{TxChannelsBalance, types::Order}, utils::send_create_order_response,
+    messages::{TxChannelsBalance, types::Order},
+    utils::send_create_order_response,
 };
 
 pub async fn handle_create_order(
@@ -17,11 +19,13 @@ pub async fn handle_create_order(
     let Some(user_balances) = balances.get_mut(&data.user_id) else {
         send_create_order_response(
             correlation_id,
-            data.user_id,
-            0.to_string(),
-            "Please buy asset first".to_string(),
-            Vec::new(),
+            data.user_id.clone(),
             None,
+            0.to_string(),
+            String::from("Please Buy Asset First"),
+            Vec::new(),
+            types::engine::OrderStatus::CANCEL,
+            data,
         )
         .await;
         return;
@@ -48,11 +52,13 @@ pub async fn handle_create_order(
             if user_usdt_balance < qty {
                 send_create_order_response(
                     correlation_id,
-                    data.user_id,
+                    data.user_id.clone(),
+                    None,
                     0.to_string(),
-                    "user does not have enough usdt".to_string(),
+                    String::from("User Does not have enough USDT"),
                     Vec::new(),
-                    None
+                    types::engine::OrderStatus::CANCEL,
+                    data,
                 )
                 .await;
                 return;
@@ -77,11 +83,13 @@ pub async fn handle_create_order(
             if user_asset_balance < qty {
                 send_create_order_response(
                     correlation_id,
-                    data.user_id,
+                    data.user_id.clone(),
+                    None,
                     0.to_string(),
-                    "user does not have enough asset".to_string(),
+                    String::from("User Does not have enough Asset"),
                     Vec::new(),
-                    None
+                    types::engine::OrderStatus::CANCEL,
+                    data,
                 )
                 .await;
                 return;
@@ -104,7 +112,6 @@ pub async fn handle_create_order(
     }
 }
 
-
 async fn send_to_orderbook(order: Order, channels: &TxChannelsBalance) {
     let tx = match order.data.market.as_str() {
         "BTC" => &channels.btc,
@@ -116,6 +123,9 @@ async fn send_to_orderbook(order: Order, channels: &TxChannelsBalance) {
         }
     };
     if let Err(e) = tx.send(order).await {
-        println!("there is some error in sending to orderbook via channel {:?}", e);
+        println!(
+            "there is some error in sending to orderbook via channel {:?}",
+            e
+        );
     }
 }

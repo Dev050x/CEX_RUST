@@ -17,7 +17,7 @@ pub enum EngineRequest {
     },
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CreateOrderData {
     pub market: String,
     pub qty: String,
@@ -49,10 +49,12 @@ pub enum EngineResponse {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CreateOrderResponseData {
     pub user_id: String,
-    pub filled: String,
-    pub msg: String,
-    pub trades: Vec<Trade>,
     pub order_id: Option<String>,
+    pub filled: String,
+    pub status: OrderStatus,
+    pub msg: String,
+    pub order: CreateOrderData,
+    pub trades: Vec<Trade>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -62,14 +64,14 @@ pub struct OnRampResponseData {
 }
 
 // Extra Type-----------------------------------------------------------------------------------
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum TypeOfOrder {
     LIMIT,
     MARKET,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Side {
     BUY,
     SELL,
@@ -105,6 +107,7 @@ pub struct Orders {
     pub status: OrderStatus,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum OrderStatus {
     OPEN,
     PartialyFilled,

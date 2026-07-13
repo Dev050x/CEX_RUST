@@ -30,7 +30,7 @@ pub async fn send_to_engine(
         Err(e) => println!("publish error: {:?}", e),
     }
 
-    let response = tokio::time::timeout(std::time::Duration::from_secs(5), rx)
+    let response = tokio::time::timeout(std::time::Duration::from_secs(10), rx)
         .await
         .map_err(|_| CustomError::TimeoutError)?
         .map_err(|_| CustomError::InternalError)?;
@@ -60,7 +60,7 @@ pub async fn listening_for_engine_response() {
         else {
             continue;
         };
-
+        println!("got response from the engine: {:?}", reply);
         let reply: StreamReadReply = match redis::from_redis_value(reply) {
             Ok(r) => r,
             Err(e) => {

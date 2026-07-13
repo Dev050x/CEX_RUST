@@ -47,7 +47,7 @@ pub async fn handle_onramp(
             },
         );
     }
-
+    println!("Publishing msg to backend");
     let _ = RedisManager::get_instance()
         .await
         .publish_message(&EngineResponse::OnRamp {
