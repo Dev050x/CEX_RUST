@@ -1,4 +1,4 @@
-use sqlx::{Pool, Postgres, migrate::MigrateDatabase, postgres::PgPoolOptions};
+use sqlx::{Pool, Postgres, postgres::PgPoolOptions};
 
 pub struct PostgresDb {
     pool: Pool<Postgres>,

@@ -726,12 +726,15 @@ dependencies = [
 name = "db-poller"
 version = "0.1.0"
 dependencies = [
+ "db",
  "dotenvy",
  "redis",
  "serde",
  "serde_json",
+ "sqlx",
  "tokio",
  "types",
+ "uuid",
 ]
 
 [[package]]

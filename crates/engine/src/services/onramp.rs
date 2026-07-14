@@ -6,8 +6,8 @@ use types::{
 };
 
 const AVAILABLE_BALANCE: [&'static str; 4] = ["BTC", "SOL", "ETH", "USDT"];
-const HARD_CODED_USER_1: &'static str = "582c5432-d357-469d-8a18-9081f9d0762c";
-const HARD_CODED_USER_2: &'static str = "db47313c-b40f-4c68-8ccd-c50b592b1241";
+const HARD_CODED_USER_1: &'static str = "7c33c301-ddb1-4239-8ffe-79a707110b77";
+const HARD_CODED_USER_2: &'static str = "df79bdf8-bbec-4800-9e85-c7202c0016f0";
 
 pub async fn handle_onramp(
     correlation_id: String,

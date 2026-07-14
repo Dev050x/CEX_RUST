@@ -1,13 +1,21 @@
 use redis::{AsyncCommands, Client, streams::StreamReadReply};
+use sqlx::{Pool, Postgres};
+use sqlx_postgres::PostgresDb;
 use std::time::Duration;
 use types::engine::EngineResponse;
+
+use crate::controllers::handle_create_order;
+
+mod controllers;
+mod utils;
 
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();
     let redis_url = std::env::var("REDIS_URL").expect("error in loading redis url");
-    
+
     let client = Client::open(redis_url).unwrap();
+    println!("connected to redis");
     let config =
         redis::AsyncConnectionConfig::new().set_response_timeout(Some(Duration::from_secs(10)));
     let mut conn = client
@@ -18,10 +26,15 @@ async fn main() {
         .block(0)
         .count(1);
     let mut last_id = String::from("$");
+    let db_connection = PostgresDb::new()
+        .await
+        .unwrap()
+        .get_pg_connection()
+        .expect("Some Error in DB Connection");
 
     loop {
         let Ok(value) = conn
-            .xread_options(&["to-engine"], &[last_id.clone()], &opts)
+            .xread_options(&["to-backend"], &[last_id.clone()], &opts)
             .await
         else {
             println!("no data in redis stream");
@@ -29,7 +42,7 @@ async fn main() {
         };
         // println!("Waiting on stream: to-backend, last_id: {}", last_id);
         let reply: StreamReadReply = redis::from_redis_value(value).unwrap();
-        // println!("db poller got your request: {:?} \new", reply);
+        println!("db poller got your request: {:?} \new", reply);
 
         for stream in reply.keys {
             for entry in stream.ids {
@@ -41,13 +54,23 @@ async fn main() {
                     };
 
                     if let Ok(engine_response) = serde_json::from_str::<EngineResponse>(json_str) {
-                        println!(
-                            "engine response that we got from the db poller {:?}",
-                            engine_response
-                        );
+                        println!("engine_response: {:?}", engine_response);
+                        handle_response(engine_response, &db_connection).await
                     }
                 }
             }
+        }
+    }
+}
+
+async fn handle_response(data: EngineResponse, conn: &Pool<Postgres>) {
+    match data {
+        EngineResponse::CreateOrder {
+            correlation_id: _,
+            data,
+        } => handle_create_order(data, conn).await.unwrap(),
+        EngineResponse::OnRamp { correlation_id: _, data: _ } => {
+            
         }
     }
 }
