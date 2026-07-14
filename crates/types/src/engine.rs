@@ -55,6 +55,7 @@ pub struct CreateOrderResponseData {
     pub msg: String,
     pub order: CreateOrderData,
     pub trades: Vec<Trade>,
+    pub depth: Option<Depth>
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -82,6 +83,12 @@ pub enum Market {
     BTC,
     ETH,
     SOL,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Depth {
+    pub bids: Vec<[String; 2]>,
+    pub asks: Vec<[String; 2]>,
 }
 
 // Orderbook -----------------------------------------------------------------------------------

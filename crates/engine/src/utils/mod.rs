@@ -1,4 +1,4 @@
-use types::engine::{CreateOrderData, CreateOrderResponseData, EngineResponse, OrderStatus, Trade};
+use types::engine::{CreateOrderData, CreateOrderResponseData, Depth, EngineResponse, OrderStatus, Orderbook, Trade};
 
 use crate::store::RedisManager;
 
@@ -10,7 +10,8 @@ pub async fn send_create_order_response(
     msg: String,
     trades: Vec<Trade>,
     status: OrderStatus,
-    order: CreateOrderData
+    order: CreateOrderData,
+    depth: Option<Depth>
 ) {
     println!("sending the response {:?} \new", msg);
     let _ = RedisManager::get_instance()
@@ -24,9 +25,26 @@ pub async fn send_create_order_response(
                 filled,
                 msg,
                 status,
-                order
+                order,
+                depth
             }
         })
         .await;
     return;
+}
+
+pub fn get_depth(orderbook: &Orderbook) -> Depth {
+    let mut depth = Depth {
+        bids: Vec::new(),
+        asks: Vec::new()
+    };
+    
+    for (price, resting_order) in &orderbook.bids {
+        depth.bids.push([price.to_string(), resting_order.available_qty.to_string()]);
+    }
+
+    for (price, resting_order) in &orderbook.asks {
+        depth.asks.push([price.to_string(), resting_order.available_qty.to_string()]);
+    }
+    return depth;
 }

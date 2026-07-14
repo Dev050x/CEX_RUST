@@ -3,9 +3,7 @@ use tokio::sync::mpsc;
 use types::engine::{Market, OrderStatus, Orderbook, Trade};
 
 use crate::{
-    matching::match_order,
-    messages::types::{Order, OrderData, UpdateBalance},
-    utils::send_create_order_response,
+    matching::match_order, messages::types::{Order, OrderData, UpdateBalance}, utils::{get_depth, send_create_order_response},
 };
 
 pub async fn run_market(
@@ -29,6 +27,7 @@ pub async fn run_market(
         println!("trades that happens: {:?} ", trades);
         let fill_qty = calculate_filled_qty(&trades);
         let order_status = calculate_status(fill_qty, order_data.qty.parse::<u64>().unwrap());
+        let depth = get_depth(&orderbook);
         let _ = send_create_order_response(
             order.correlation_id,
             user_id,
@@ -37,7 +36,8 @@ pub async fn run_market(
             String::from("order Placed successfully"),
             trades,
             order_status,
-            order_data
+            order_data,
+            Some(depth)
         ).await;
     }
 }
