@@ -1,0 +1,14 @@
+[package]
+name = "web-socket-server"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+redis = { workspace = true }
+tokio = { workspace = true }
+dotenvy = { workspace = true }
+types = { package = "types", path = "../types" }
+tokio-tungstenite = "0.30.0"
+futures-util = "0.3.32"
+serde = { workspace = true }
+serde_json = { workspace = true }
