@@ -35,7 +35,7 @@ pub async fn send_to_engine(
         .map_err(|_| CustomError::TimeoutError)?
         .map_err(|_| CustomError::InternalError)?;
 
-    get_pending().remove(&correlation_id); 
+    get_pending().remove(&correlation_id);
 
     match response {
         EngineResponse::CreateOrder {
@@ -50,14 +50,14 @@ pub async fn send_to_engine(
 }
 
 pub async fn listening_for_engine_response() {
-    let mut last_id = "$".to_string();
+    let manager = RedisManager::get_instance().await;
+    let mut last_id = manager
+        .get_last_stream_id("to-backend")
+        .await
+        .unwrap_or_else(|_| "0".to_string());
 
     loop {
-        let Ok(reply) = RedisManager::get_instance()
-            .await
-            .read_message(&last_id)
-            .await
-        else {
+        let Ok(reply) = manager.read_message(&last_id).await else {
             continue;
         };
         println!("got response from the engine: {:?}", reply);

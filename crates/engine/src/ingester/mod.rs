@@ -5,13 +5,17 @@ use types::engine::EngineRequest;
 use crate::store::RedisManager;
 
 pub async fn ingester(tx_ingest: mpsc::Sender<EngineRequest>) {
-    let mut last_id = "$".to_string();
+    let manager = RedisManager::get_instance().await;
+    let mut last_id = manager
+        .get_last_stream_id("to-engine")
+        .await
+        .unwrap_or_else(|_| "0".to_string());
     loop {
-        let Ok(result) = RedisManager::get_instance()
-            .await
+        let Ok(result) = manager
             .read_message(&last_id)
             .await
         else {
+            println!("no data received in engine");
             continue;
         };
 

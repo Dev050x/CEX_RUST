@@ -16,6 +16,7 @@ async fn main() {
 
     let client = Client::open(redis_url).unwrap();
     println!("connected to redis");
+
     let config =
         redis::AsyncConnectionConfig::new().set_response_timeout(Some(Duration::from_secs(10)));
     let mut conn = client
@@ -23,9 +24,13 @@ async fn main() {
         .await
         .unwrap();
     let opts = redis::streams::StreamReadOptions::default()
-        .block(0)
+        .block(5_000)
         .count(1);
-    let mut last_id = String::from("$");
+    let mut last_id: String = conn
+        .xinfo_stream("to-backend")
+        .await
+        .unwrap_or_else(|_| "$".to_string());
+
     let db_connection = PostgresDb::new()
         .await
         .unwrap()
@@ -69,8 +74,9 @@ async fn handle_response(data: EngineResponse, conn: &Pool<Postgres>) {
             correlation_id: _,
             data,
         } => handle_create_order(data, conn).await.unwrap(),
-        EngineResponse::OnRamp { correlation_id: _, data: _ } => {
-            
-        }
+        EngineResponse::OnRamp {
+            correlation_id: _,
+            data: _,
+        } => {}
     }
 }
