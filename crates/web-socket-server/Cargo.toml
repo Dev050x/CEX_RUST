@@ -12,3 +12,4 @@ tokio-tungstenite = "0.30.0"
 futures-util = "0.3.32"
 serde = { workspace = true }
 serde_json = { workspace = true }
+uuid = { workspace = true }

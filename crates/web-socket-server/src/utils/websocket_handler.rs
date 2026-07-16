@@ -1,20 +1,19 @@
 use futures_util::{SinkExt, StreamExt};
-use serde::{Deserialize, Serialize};
 use tokio::{
-    net::{TcpStream},
+    net::TcpStream,
     sync::broadcast::{self, Sender},
 };
 use tokio_tungstenite::{accept_async, tungstenite::Message};
 
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(tag = "type")]
-enum ClientMessage {
-    SUBSCRIBE { market: String },
-    UNSUBSCRIBE,
-}
+use crate::types::{ClientMessage, ClientRegistry, ClientSub};
 
-pub fn hadle_websocket_connection(stream: TcpStream, depth_tx: Sender<String>) {
+pub fn hadle_websocket_connection(
+    stream: TcpStream,
+    depth_tx: Sender<String>,
+    client_registery: ClientRegistry,
+) {
     let mut push_task: Option<tokio::task::JoinHandle<()>> = None;
+    let connection_id = uuid::Uuid::new_v4().to_string();
 
     tokio::spawn(async move {
         let ws_stream = accept_async(stream).await.unwrap();
@@ -35,13 +34,24 @@ pub fn hadle_websocket_connection(stream: TcpStream, depth_tx: Sender<String>) {
             println!("got the client msg: {:?}", client_msg);
 
             match client_msg {
-                ClientMessage::SUBSCRIBE { market: _  } => {
+                ClientMessage::SUBSCRIBE { params } => {
                     if let Some(handle) = push_task.take() {
                         handle.abort();
                     }
                     let mut rx = depth_tx.subscribe();
                     println!("subscribe to broadcaseter");
+                    let data_params = params[0].clone();
+                    let parts:Vec<&str> = data_params.split(".").collect();
+                    let market = parts[1];
+
                     let w = write.clone();
+                    let mut registery = client_registery.lock().await;
+                    registery.push(ClientSub {
+                        id: connection_id.clone(),
+                        market: market.to_string().clone(),
+                        write: write.clone(),
+                    });
+
                     push_task = Some(tokio::spawn(async move {
                         loop {
                             match rx.recv().await {
@@ -60,6 +70,8 @@ pub fn hadle_websocket_connection(stream: TcpStream, depth_tx: Sender<String>) {
                 }
                 ClientMessage::UNSUBSCRIBE => {
                     if let Some(handle) = push_task.take() {
+                        let mut clients = client_registery.lock().await;
+                        clients.retain(|c| c.id != connection_id);
                         handle.abort();
                         println!("client unsubscribed");
                     }
@@ -68,6 +80,8 @@ pub fn hadle_websocket_connection(stream: TcpStream, depth_tx: Sender<String>) {
         }
 
         if let Some(handle) = push_task.take() {
+            let mut clients = client_registery.lock().await;
+            clients.retain(|c| c.id != connection_id);
             handle.abort();
         }
         println!("connection closed");
