@@ -1,9 +1,12 @@
+use rust_decimal::Decimal;
 use std::collections::BTreeMap;
 use tokio::sync::mpsc;
 use types::engine::{Market, OrderStatus, Orderbook, Trade};
 
 use crate::{
-    matching::match_order, messages::types::{Order, OrderData, UpdateBalance}, utils::{get_depth, send_create_order_response},
+    matching::match_order,
+    messages::types::{Order, OrderData, UpdateBalance},
+    utils::{convert_to_decimal, get_depth, send_create_order_response},
 };
 
 pub async fn run_market(
@@ -14,7 +17,7 @@ pub async fn run_market(
     let mut orderbook = Orderbook {
         bids: BTreeMap::new(),
         asks: BTreeMap::new(),
-        last_traded_price: 0,
+        last_traded_price: Decimal::from(0),
     };
 
     while let Some(order) = rx_channel.recv().await {
@@ -26,7 +29,7 @@ pub async fn run_market(
         let trades = match_order(&mut orderbook, incoming_order, &mut tx_channel_market).await;
         println!("trades that happens: {:?} ", trades);
         let fill_qty = calculate_filled_qty(&trades);
-        let order_status = calculate_status(fill_qty, order_data.qty.parse::<u64>().unwrap());
+        let order_status = calculate_status(fill_qty, convert_to_decimal(order_data.qty.clone()));
         let depth = get_depth(&orderbook);
         let _ = send_create_order_response(
             order.correlation_id,
@@ -37,13 +40,14 @@ pub async fn run_market(
             trades,
             order_status,
             order_data,
-            Some(depth)
-        ).await;
+            Some(depth),
+        )
+        .await;
     }
 }
 
-fn calculate_filled_qty(trades: &Vec<Trade>) -> u64 {
-    let mut fill_qty = 0;
+fn calculate_filled_qty(trades: &Vec<Trade>) -> Decimal {
+    let mut fill_qty = Decimal::from(0);
 
     if trades.is_empty() {
         return fill_qty;
@@ -56,10 +60,10 @@ fn calculate_filled_qty(trades: &Vec<Trade>) -> u64 {
     return fill_qty;
 }
 
-fn calculate_status(fill_qty: u64, qty: u64) -> OrderStatus {
+fn calculate_status(fill_qty: Decimal, qty: Decimal) -> OrderStatus {
     if fill_qty == qty {
         OrderStatus::FILLED
-    }else if fill_qty == 0 {
+    } else if fill_qty == Decimal::from(0) {
         OrderStatus::OPEN
     } else {
         OrderStatus::PartialyFilled

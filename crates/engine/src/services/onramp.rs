@@ -1,8 +1,10 @@
 use crate::store::RedisManager;
+use rust_decimal::Decimal;
+use serde_json::to_string;
 use std::collections::HashMap;
 use types::{
     engine::{EngineResponse, OnRampData, OnRampResponseData},
-    user::{self, UserBalance},
+    user::UserBalance,
 };
 
 const AVAILABLE_BALANCE: [&'static str; 4] = ["BTC", "SOL", "ETH", "USDT"];
@@ -20,32 +22,36 @@ pub async fn handle_onramp(
 
     for asset in &AVAILABLE_BALANCE {
         user_assets.entry(asset.to_string()).or_insert(UserBalance {
-            available_balance: 0,
-            locked_balance: 0,
-            reserve_balance: 0,
+            available_balance: Decimal::from(0),
+            locked_balance: Decimal::from(0),
+            reserve_balance: Decimal::from(0),
         });
     }
 
     if data.user_id == HARD_CODED_USER_1.to_string() {
-        user_assets.insert(
-            "USDT".to_string(),
-            UserBalance {
-                available_balance: 10000,
-                locked_balance: 0,
-                reserve_balance: 0,
-            },
-        );
+        for asset in &AVAILABLE_BALANCE {
+            user_assets.insert(
+                asset.to_string(),
+                UserBalance {
+                    available_balance: Decimal::from(10000),
+                    locked_balance: Decimal::from(0),
+                    reserve_balance: Decimal::from(0),
+                },
+            );
+        }
     }
 
     if data.user_id == HARD_CODED_USER_2.to_string() {
-        user_assets.insert(
-            "ETH".to_string(),
-            UserBalance {
-                available_balance: 10,
-                locked_balance: 0,
-                reserve_balance: 0,
-            },
-        );
+        for asset in &AVAILABLE_BALANCE {
+            user_assets.insert(
+                asset.to_string(),
+                UserBalance {
+                    available_balance: Decimal::from(10000),
+                    locked_balance: Decimal::from(0),
+                    reserve_balance: Decimal::from(0),
+                },
+            );
+        }
     }
     println!("Publishing msg to backend");
     let _ = RedisManager::get_instance()

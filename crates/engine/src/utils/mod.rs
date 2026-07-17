@@ -1,3 +1,4 @@
+use rust_decimal::Decimal;
 use types::engine::{CreateOrderData, CreateOrderResponseData, Depth, EngineResponse, OrderStatus, Orderbook, Trade};
 
 use crate::store::RedisManager;
@@ -47,4 +48,12 @@ pub fn get_depth(orderbook: &Orderbook) -> Depth {
         depth.asks.push([price.to_string(), resting_order.available_qty.to_string()]);
     }
     return depth;
+}
+
+pub fn convert_to_decimal(data: String) -> Decimal {
+    data.parse().unwrap()
+}
+
+pub fn convert_to_string(data: Decimal) -> String {
+    data.to_string()
 }

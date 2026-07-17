@@ -6,8 +6,7 @@ use types::{
 };
 
 use crate::{
-    messages::{TxChannelsBalance, types::Order},
-    utils::send_create_order_response,
+    messages::{TxChannelsBalance, types::Order}, utils::{convert_to_decimal, send_create_order_response},
 };
 
 pub async fn handle_create_order(
@@ -47,8 +46,8 @@ pub async fn handle_create_order(
     // TODO: get avg price for market price(still remain)
     match &data.side {
         Side::BUY => {
-            let qty = data.qty.parse::<u64>().unwrap()
-                * data.price.as_ref().unwrap().parse::<u64>().unwrap();
+            let qty = convert_to_decimal(data.qty.clone())
+                * convert_to_decimal(data.price.as_ref().unwrap().clone());
             println!("required usdt {:?} ", qty);
             if user_usdt_balance < qty {
                 send_create_order_response(
@@ -81,7 +80,7 @@ pub async fn handle_create_order(
             }
         }
         Side::SELL => {
-            let qty = data.qty.parse::<u64>().unwrap();
+            let qty = convert_to_decimal(data.qty.clone());
             if user_asset_balance < qty {
                 send_create_order_response(
                     correlation_id,

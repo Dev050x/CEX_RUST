@@ -57,33 +57,33 @@ fn update_user_balance(
     
     if let Some(available_balance) = req.available_balance {
         match available_balance {
-            BalanceOps::Increase(u64) => {
-                user_asset_balance.available_balance += u64;
+            BalanceOps::Increase(decimal) => {
+                user_asset_balance.available_balance += decimal;
             },
-            BalanceOps::Decrease(u64) => {
-                user_asset_balance.available_balance -= u64;
+            BalanceOps::Decrease(decimal) => {
+                user_asset_balance.available_balance -= decimal;
             }
         }
     }
 
     if let Some(locked_balance) = req.locked_balance {
         match locked_balance {
-            BalanceOps::Increase(u64) => {
-                user_asset_balance.locked_balance += u64;
+            BalanceOps::Increase(decimal) => {
+                user_asset_balance.locked_balance += decimal;
             },
-            BalanceOps::Decrease(u64) => {
-                user_asset_balance.locked_balance  -= u64;
+            BalanceOps::Decrease(decimal) => {
+                user_asset_balance.locked_balance  -= decimal;
             }
         }
     }
 
     if let Some(reserve_balance) = req.reserved_balance {
         match reserve_balance {
-            BalanceOps::Increase(u64) => {
-                user_asset_balance.reserve_balance += u64;
+            BalanceOps::Increase(decimal) => {
+                user_asset_balance.reserve_balance += decimal;
             },
-            BalanceOps::Decrease(u64) => {
-                user_asset_balance.reserve_balance -= u64;
+            BalanceOps::Decrease(decimal) => {
+                user_asset_balance.reserve_balance -= decimal;
             }
         }
     }
