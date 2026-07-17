@@ -13,6 +13,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         web::scope("/api/v1")
             .service(auth::sign_up)
             .service(auth::sign_in)
+            .service(orders::depth)
             .service(
                 web::scope("")
                     .wrap(from_fn(my_custom_middleware))

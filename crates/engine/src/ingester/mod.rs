@@ -11,10 +11,7 @@ pub async fn ingester(tx_ingest: mpsc::Sender<EngineRequest>) {
         .await
         .unwrap_or_else(|_| "0".to_string());
     loop {
-        let Ok(result) = manager
-            .read_message(&last_id)
-            .await
-        else {
+        let Ok(result) = manager.read_message(&last_id).await else {
             println!("no data received in engine");
             continue;
         };

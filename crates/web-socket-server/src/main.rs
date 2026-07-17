@@ -1,13 +1,21 @@
-mod utils;
 mod types;
+mod utils;
 
 use std::{collections::HashMap, sync::Arc};
 
-use crate::{types::{ClientRegistry, DepthStore}, utils::{
-    depth_push_interval::depth_push_interval, redis_handler::read_redis_stream_data, websocket_handler::hadle_websocket_connection,
-}};
+use crate::{
+    types::{ClientRegistry, DepthStore},
+    utils::{
+        depth_push_interval::depth_push_interval, redis_handler::read_redis_stream_data,
+        websocket_handler::hadle_websocket_connection,
+    },
+};
 use tokio::{
-    net::TcpListener, sync::{Mutex, RwLock, broadcast::{self}},
+    net::TcpListener,
+    sync::{
+        Mutex, RwLock,
+        broadcast::{self},
+    },
 };
 
 mod store;
@@ -22,7 +30,10 @@ async fn main() {
 
     let (depth_tx, _) = broadcast::channel::<String>(1000);
 
-    tokio::spawn(read_redis_stream_data(depth_tx.clone(), depth_store.clone()));
+    tokio::spawn(read_redis_stream_data(
+        depth_tx.clone(),
+        depth_store.clone(),
+    ));
     tokio::spawn(depth_push_interval(depth_store, client_registery.clone()));
 
     while let Ok((stream, _addr)) = listner.accept().await {

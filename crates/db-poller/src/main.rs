@@ -78,5 +78,6 @@ async fn handle_response(data: EngineResponse, conn: &Pool<Postgres>) {
             correlation_id: _,
             data: _,
         } => {}
+        _ => {}
     }
 }

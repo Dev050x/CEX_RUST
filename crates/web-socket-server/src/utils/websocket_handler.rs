@@ -41,7 +41,7 @@ pub fn hadle_websocket_connection(
                     let mut rx = depth_tx.subscribe();
                     println!("subscribe to broadcaseter");
                     let data_params = params[0].clone();
-                    let parts:Vec<&str> = data_params.split(".").collect();
+                    let parts: Vec<&str> = data_params.split(".").collect();
                     let market = parts[1];
 
                     let w = write.clone();

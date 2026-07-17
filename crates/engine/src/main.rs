@@ -12,7 +12,15 @@ use tokio::sync::mpsc;
 use types::engine::{EngineRequest, Market};
 
 use crate::{
-    balance::balance, ingester::ingester, market::run_market, messages::{ChannelsBalance, ChannelsMarket, RxChannelsBalance, RxChannelsMarket, TxChannelsBalance, TxChannelsMarket, types::{Order, UpdateBalance}}, router::router,
+    balance::balance,
+    ingester::ingester,
+    market::run_market,
+    messages::{
+        ChannelsBalance, ChannelsMarket, RxChannelsBalance, RxChannelsMarket, TxChannelsBalance,
+        TxChannelsMarket,
+        types::{Request, UpdateBalance},
+    },
+    router::router,
 };
 
 #[tokio::main]
@@ -22,9 +30,9 @@ async fn main() {
     let (tx_router, rx_router) = mpsc::channel::<EngineRequest>(1024);
 
     let channels_balance = ChannelsBalance {
-        btc: mpsc::channel::<Order>(1024),
-        eth: mpsc::channel::<Order>(1024),
-        sol: mpsc::channel::<Order>(1024),
+        btc: mpsc::channel::<Request>(1024),
+        eth: mpsc::channel::<Request>(1024),
+        sol: mpsc::channel::<Request>(1024),
     };
 
     let channels_market = ChannelsMarket {

@@ -13,7 +13,6 @@ static REDIS_INSTANCE: OnceCell<RedisManager> = OnceCell::const_new();
 
 impl RedisManager {
     async fn new() -> Self {
-
         let redis_url = std::env::var("REDIS_URL").expect("redis url is missing");
         let config =
             redis::AsyncConnectionConfig::new().set_response_timeout(Some(Duration::from_secs(10)));
@@ -28,7 +27,7 @@ impl RedisManager {
             .get_multiplexed_async_connection_with_config(&config)
             .await
             .unwrap();
-        
+
         let mut warmup: redis::aio::MultiplexedConnection = publisher.clone();
         match warmup.ping::<String>().await {
             Ok(pong) => println!("redis ping ok: {pong}"),

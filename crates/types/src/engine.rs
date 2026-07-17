@@ -16,6 +16,10 @@ pub enum EngineRequest {
         correlation_id: String,
         data: OnRampData,
     },
+    GetDepth {
+        correlation_id: String,
+        data: GetDepthData,
+    },
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -33,6 +37,11 @@ pub struct OnRampData {
     pub user_id: String,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetDepthData {
+    pub market: String,
+}
+
 // Response TYPE -----------------------------------------------------------------------------------
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "msg")]
@@ -45,6 +54,10 @@ pub enum EngineResponse {
         correlation_id: String,
         data: OnRampResponseData,
     },
+    GetDepth {
+        correlation_id: String,
+        data: GetDepthResponseData,
+    },
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -56,13 +69,18 @@ pub struct CreateOrderResponseData {
     pub msg: String,
     pub order: CreateOrderData,
     pub trades: Vec<Trade>,
-    pub depth: Option<Depth>
+    pub depth: Option<Depth>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct OnRampResponseData {
     pub user_id: String,
     pub balance: HashMap<String, UserBalance>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetDepthResponseData {
+    pub depth: Depth,
 }
 
 // Extra Type-----------------------------------------------------------------------------------

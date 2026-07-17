@@ -1,5 +1,5 @@
-use actix_web::{HttpResponse, post, web};
-use types::engine::{CreateOrderData, EngineRequest, OnRampData};
+use actix_web::{HttpResponse, get, post, web};
+use types::engine::{CreateOrderData, EngineRequest, GetDepthData, OnRampData};
 use uuid::Uuid;
 
 use crate::{
@@ -50,6 +50,25 @@ pub async fn onramp(
     let payload = EngineRequest::OnRamp {
         correlation_id: correlation_id.to_string(),
         data: extra_payload,
+    };
+
+    send_to_engine(correlation_id.to_string(), payload).await
+}
+
+#[get("/depth/{market}")]
+pub async fn depth(
+    data: web::Path<String>,
+    _app_state: web::Data<AppState>,
+) -> Result<HttpResponse, CustomError> {
+    let market: String = data.into_inner();
+    let correlation_id = Uuid::new_v4();
+    println!("received request: {:?}", market);
+
+    let get_depth_data = GetDepthData { market };
+
+    let payload = EngineRequest::GetDepth {
+        correlation_id: correlation_id.to_string(),
+        data: get_depth_data,
     };
 
     send_to_engine(correlation_id.to_string(), payload).await
