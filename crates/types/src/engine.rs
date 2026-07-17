@@ -20,6 +20,10 @@ pub enum EngineRequest {
         correlation_id: String,
         data: GetDepthData,
     },
+    GetBalance {
+        correlation_id: String,
+        data: GetBalanceData
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -42,6 +46,11 @@ pub struct GetDepthData {
     pub market: String,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetBalanceData {
+    pub  user_id: String
+}
+
 // Response TYPE -----------------------------------------------------------------------------------
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "msg")]
@@ -58,6 +67,10 @@ pub enum EngineResponse {
         correlation_id: String,
         data: GetDepthResponseData,
     },
+    GetBalance {
+        correlation_id: String,
+        data: GetBalanceResponseData
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -81,6 +94,11 @@ pub struct OnRampResponseData {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetDepthResponseData {
     pub depth: Depth,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetBalanceResponseData {
+    pub balance: Option<HashMap<String, UserBalance>>
 }
 
 // Extra Type-----------------------------------------------------------------------------------

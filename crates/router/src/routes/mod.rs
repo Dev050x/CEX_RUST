@@ -2,9 +2,9 @@ pub mod auth;
 pub mod health;
 pub mod orders;
 
-use actix_web::{middleware::from_fn, web};
+use actix_web::{middleware::from_fn, web::{self}};
 
-use crate::middleware::my_custom_middleware;
+use crate::{middleware::my_custom_middleware};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(health::health_check);
@@ -18,7 +18,8 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
                 web::scope("")
                     .wrap(from_fn(my_custom_middleware))
                     .service(orders::onramp)
-                    .service(orders::create_order),
+                    .service(orders::create_order)
+                    .service(orders::get_user_balance)
             ),
     );
 }

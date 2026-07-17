@@ -6,7 +6,11 @@ use crate::{
     messages::{
         RxChannelsMarket, TxChannelsBalance,
         types::{BalanceOps, UpdateBalance},
-    }, services::{create_order::handle_create_order, get_depth::handle_get_depth, onramp::handle_onramp},
+    },
+    services::{
+        create_order::handle_create_order, get_balance::handle_get_balance,
+        get_depth::handle_get_depth, onramp::handle_onramp,
+    },
 };
 
 pub async fn balance(
@@ -35,6 +39,9 @@ pub async fn balance(
                     }
                     EngineRequest::GetDepth { correlation_id, data } => {
                         handle_get_depth(correlation_id, data, &mut tx_balance).await
+                    }
+                    EngineRequest::GetBalance {correlation_id, data} => {
+                        handle_get_balance(correlation_id, data, &balances).await;
                     }
                 }
             }

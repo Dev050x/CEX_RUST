@@ -1,5 +1,5 @@
 use actix_web::{HttpResponse, get, post, web};
-use types::engine::{CreateOrderData, EngineRequest, GetDepthData, OnRampData};
+use types::engine::{CreateOrderData, EngineRequest, GetBalanceData, GetDepthData, OnRampData};
 use uuid::Uuid;
 
 use crate::{
@@ -70,6 +70,24 @@ pub async fn depth(
         correlation_id: correlation_id.to_string(),
         data: get_depth_data,
     };
+    send_to_engine(correlation_id.to_string(), payload).await
+}
 
+#[get("/balance")]
+pub async fn get_user_balance(
+    payload: web::ReqData<Payload>,
+) -> Result<HttpResponse, CustomError> {
+    let inner_payload = payload.into_inner();
+    let correlation_id = Uuid::new_v4();
+    println!("received get balance request with this userId");
+
+    let get_user_balance_data = GetBalanceData {
+        user_id: inner_payload.user_id,
+    };
+
+    let payload = EngineRequest::GetBalance {
+        correlation_id: correlation_id.to_string(),
+        data: get_user_balance_data,
+    };
     send_to_engine(correlation_id.to_string(), payload).await
 }
