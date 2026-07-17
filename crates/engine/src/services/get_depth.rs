@@ -24,4 +24,3 @@ pub async fn handle_get_depth(correlation_id: String, data: GetDepthData, channe
         );
     }
 }
-    

@@ -3,7 +3,7 @@ use redis::streams::StreamReadReply;
 use tokio::sync::broadcast::Sender;
 use types::engine::{Depth, EngineResponse};
 
-pub async fn read_redis_stream_data(depth_tx: Sender<String>, depth_store: DepthStore) {
+pub async fn read_redis_stream_data(_depth_tx: Sender<String>, depth_store: DepthStore) {
     let manager = RedisManager::get_instance().await;
     let mut last_id = manager
         .get_last_stream_id("to-backend")
@@ -28,7 +28,6 @@ pub async fn read_redis_stream_data(depth_tx: Sender<String>, depth_store: Depth
                         redis::Value::BulkString(b) => std::str::from_utf8(b).unwrap(),
                         _ => continue,
                     };
-                    // let _ = depth_tx.send(json_str.to_string());
                     if let Ok(engine_response) = serde_json::from_str::<EngineResponse>(json_str) {
                         println!("received engine response: {:?}", engine_response);
                         process_engine_response(engine_response, &depth_store).await;

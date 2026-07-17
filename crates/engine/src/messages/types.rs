@@ -1,7 +1,7 @@
 use std::num::ParseIntError;
 
 use rust_decimal::Decimal;
-use types::engine::{CreateOrderData, GetDepthData, OrderStatus, Side, TypeOfOrder};
+use types::engine::{CreateOrderData, OrderStatus, Side, TypeOfOrder};
 use uuid::Uuid;
 
 use crate::utils::convert_to_decimal;

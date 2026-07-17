@@ -25,7 +25,6 @@ async fn main() -> std::io::Result<()> {
             .get_pg_connection()
             .unwrap()
             .clone(),
-        jwt_secret: std::env::var("JWT_SECRET").expect("JWT_SECRET must be set"),
     });
 
     tokio::spawn(listening_for_engine_response());

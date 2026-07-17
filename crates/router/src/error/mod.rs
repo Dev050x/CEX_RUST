@@ -15,8 +15,6 @@ pub enum CustomError {
     InternalError,
     #[display("User not found")]
     UserNotFound,
-    #[display("Please Login First")]
-    LoginFirst,
     #[display("Please Provide jwt token")]
     JwtMissing,
     #[display("User already Exist")]
@@ -37,7 +35,6 @@ impl ResponseError for CustomError {
             CustomError::InternalError => StatusCode::INTERNAL_SERVER_ERROR,
             CustomError::UserNotFound => StatusCode::UNAUTHORIZED,
             CustomError::JwtMissing => StatusCode::UNAUTHORIZED,
-            CustomError::LoginFirst => StatusCode::UNAUTHORIZED,
             CustomError::UserExists => StatusCode::UNAUTHORIZED,
             CustomError::WrongPassword => StatusCode::BAD_REQUEST,
             CustomError::WrongJwtToken => StatusCode::UNAUTHORIZED,
