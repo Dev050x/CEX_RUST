@@ -1,7 +1,7 @@
 use std::num::ParseIntError;
 
 use rust_decimal::Decimal;
-use types::engine::{CreateOrderData, OrderStatus, Side, TypeOfOrder};
+use types::engine::{CreateOrderData, GetDepthData, OrderStatus, Side, TypeOfOrder};
 use uuid::Uuid;
 
 use crate::utils::convert_to_decimal;
@@ -21,7 +21,7 @@ pub struct OrderData {
     pub user_id: String,
     pub side: Side,
     pub order_id: String,
-    pub status: OrderStatus
+    pub status: OrderStatus,
 }
 
 impl TryFrom<CreateOrderData> for OrderData {
@@ -36,21 +36,30 @@ impl TryFrom<CreateOrderData> for OrderData {
             user_id: value.user_id,
             side: value.side,
             order_id: Uuid::new_v4().to_string(),
-            status: OrderStatus::OPEN
+            status: OrderStatus::OPEN,
         })
     }
 }
-
 
 pub struct UpdateBalance {
     pub user_id: String,
     pub asset: String,
     pub available_balance: Option<BalanceOps>,
     pub locked_balance: Option<BalanceOps>,
-    pub reserved_balance: Option<BalanceOps>
+    pub reserved_balance: Option<BalanceOps>,
 }
 
 pub enum BalanceOps {
     Increase(Decimal),
-    Decrease(Decimal)
+    Decrease(Decimal),
+}
+
+#[derive(Debug)]
+pub struct Depth {
+    pub correlation_id: String,
+}
+
+pub enum Request {
+    OrderData(Order),
+    DepthData(Depth),
 }

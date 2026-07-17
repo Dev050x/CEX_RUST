@@ -6,7 +6,11 @@ use types::{
 };
 
 use crate::{
-    messages::{TxChannelsBalance, types::Order}, utils::{convert_to_decimal, send_create_order_response},
+    messages::{
+        TxChannelsBalance,
+        types::{Order, Request},
+    },
+    utils::{convert_to_decimal, send_create_order_response},
 };
 
 pub async fn handle_create_order(
@@ -25,7 +29,7 @@ pub async fn handle_create_order(
             Vec::new(),
             types::engine::OrderStatus::CANCEL,
             data,
-            None
+            None,
         )
         .await;
         return;
@@ -59,7 +63,7 @@ pub async fn handle_create_order(
                     Vec::new(),
                     types::engine::OrderStatus::CANCEL,
                     data,
-                    None
+                    None,
                 )
                 .await;
                 return;
@@ -91,7 +95,7 @@ pub async fn handle_create_order(
                     Vec::new(),
                     types::engine::OrderStatus::CANCEL,
                     data,
-                    None
+                    None,
                 )
                 .await;
                 return;
@@ -124,7 +128,7 @@ async fn send_to_orderbook(order: Order, channels: &TxChannelsBalance) {
             return;
         }
     };
-    if let Err(e) = tx.send(order).await {
+    if let Err(e) = tx.send(Request::OrderData(order)).await {
         println!(
             "there is some error in sending to orderbook via channel {:?}",
             e

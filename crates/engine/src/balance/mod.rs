@@ -1,9 +1,12 @@
-use std::{collections::HashMap};
+use std::collections::HashMap;
 use tokio::sync::mpsc;
 use types::{engine::EngineRequest, user::UserBalance};
 
 use crate::{
-    messages::{RxChannelsMarket, TxChannelsBalance, types::{BalanceOps, UpdateBalance}}, services::{create_order::handle_create_order, onramp::handle_onramp},
+    messages::{
+        RxChannelsMarket, TxChannelsBalance,
+        types::{BalanceOps, UpdateBalance},
+    }, services::{create_order::handle_create_order, get_depth::handle_get_depth, onramp::handle_onramp},
 };
 
 pub async fn balance(
@@ -30,6 +33,9 @@ pub async fn balance(
                     } => {
                         handle_onramp(correlation_id, data, &mut balances).await;
                     }
+                    EngineRequest::GetDepth { correlation_id, data } => {
+                        handle_get_depth(correlation_id, data, &mut tx_balance).await
+                    }
                 }
             }
 
@@ -53,13 +59,17 @@ fn update_user_balance(
     balance: &mut HashMap<String, HashMap<String, UserBalance>>,
     req: UpdateBalance,
 ) {
-    let user_asset_balance = balance.get_mut(&req.user_id).unwrap().get_mut(&req.asset).unwrap();
-    
+    let user_asset_balance = balance
+        .get_mut(&req.user_id)
+        .unwrap()
+        .get_mut(&req.asset)
+        .unwrap();
+
     if let Some(available_balance) = req.available_balance {
         match available_balance {
             BalanceOps::Increase(decimal) => {
                 user_asset_balance.available_balance += decimal;
-            },
+            }
             BalanceOps::Decrease(decimal) => {
                 user_asset_balance.available_balance -= decimal;
             }
@@ -70,9 +80,9 @@ fn update_user_balance(
         match locked_balance {
             BalanceOps::Increase(decimal) => {
                 user_asset_balance.locked_balance += decimal;
-            },
+            }
             BalanceOps::Decrease(decimal) => {
-                user_asset_balance.locked_balance  -= decimal;
+                user_asset_balance.locked_balance -= decimal;
             }
         }
     }
@@ -81,7 +91,7 @@ fn update_user_balance(
         match reserve_balance {
             BalanceOps::Increase(decimal) => {
                 user_asset_balance.reserve_balance += decimal;
-            },
+            }
             BalanceOps::Decrease(decimal) => {
                 user_asset_balance.reserve_balance -= decimal;
             }

@@ -16,7 +16,7 @@ pub async fn match_order(
         Side::SELL => match_against_bids(orderbook, &mut order, tx_channel_market).await,
     };
 
-    if order.qty >  Decimal::from(0) && !matches!(order.r#type, TypeOfOrder::MARKET) {
+    if order.qty > Decimal::from(0) && !matches!(order.r#type, TypeOfOrder::MARKET) {
         order.status = if trades.is_empty() {
             OrderStatus::OPEN
         } else {
@@ -37,20 +37,30 @@ pub async fn match_order(
 
         //locking user blaance
         let _ = match &order.side {
-            Side::BUY => tx_channel_market.send(UpdateBalance {
-                user_id: order.user_id.clone(),
-                asset: "USDT".to_string(),
-                available_balance: None,
-                locked_balance: Some(BalanceOps::Increase(order.qty * order.price.unwrap())),
-                reserved_balance: None,
-            }).await,
-            Side::SELL => tx_channel_market.send(UpdateBalance {
-                user_id: order.user_id.clone(),
-                asset: order.market.clone(),
-                available_balance: None,
-                locked_balance: Some(BalanceOps::Increase(order.qty)),
-                reserved_balance: None,
-            }).await,
+            Side::BUY => {
+                tx_channel_market
+                    .send(UpdateBalance {
+                        user_id: order.user_id.clone(),
+                        asset: "USDT".to_string(),
+                        available_balance: None,
+                        locked_balance: Some(BalanceOps::Increase(
+                            order.qty * order.price.unwrap(),
+                        )),
+                        reserved_balance: None,
+                    })
+                    .await
+            }
+            Side::SELL => {
+                tx_channel_market
+                    .send(UpdateBalance {
+                        user_id: order.user_id.clone(),
+                        asset: order.market.clone(),
+                        available_balance: None,
+                        locked_balance: Some(BalanceOps::Increase(order.qty)),
+                        reserved_balance: None,
+                    })
+                    .await
+            }
         };
         println!("user balance locked");
 

@@ -46,6 +46,10 @@ pub async fn send_to_engine(
             correlation_id: _,
             data,
         } => Ok(HttpResponse::Ok().json(data)),
+        EngineResponse::GetDepth {
+            correlation_id: _,
+            data,
+        } => Ok(HttpResponse::Ok().json(data)),
     }
 }
 
@@ -90,6 +94,14 @@ pub async fn listening_for_engine_response() {
                                 }
                             }
                             EngineResponse::OnRamp {
+                                correlation_id,
+                                data: _,
+                            } => {
+                                if let Some(tx) = get_pending().remove(correlation_id) {
+                                    tx.1.send(response).ok();
+                                }
+                            }
+                            EngineResponse::GetDepth {
                                 correlation_id,
                                 data: _,
                             } => {

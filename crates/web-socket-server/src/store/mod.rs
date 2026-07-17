@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use dotenvy;
 use redis::{AsyncCommands, Client, Value};
-use tokio::sync::OnceCell;  
+use tokio::sync::OnceCell;
 
 pub struct RedisManager {
     subscriber: redis::aio::MultiplexedConnection,
@@ -30,9 +30,7 @@ impl RedisManager {
         }
 
         println!("connected with Redis");
-        Self {
-            subscriber,
-        }
+        Self { subscriber }
     }
 
     pub async fn get_instance() -> &'static RedisManager {

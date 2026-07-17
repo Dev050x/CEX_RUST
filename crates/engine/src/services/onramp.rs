@@ -1,6 +1,5 @@
 use crate::store::RedisManager;
 use rust_decimal::Decimal;
-use serde_json::to_string;
 use std::collections::HashMap;
 use types::{
     engine::{EngineResponse, OnRampData, OnRampResponseData},
