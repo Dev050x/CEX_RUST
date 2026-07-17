@@ -1,7 +1,10 @@
 use std::num::ParseIntError;
 
+use rust_decimal::Decimal;
 use types::engine::{CreateOrderData, OrderStatus, Side, TypeOfOrder};
 use uuid::Uuid;
+
+use crate::utils::convert_to_decimal;
 
 #[derive(Debug)]
 pub struct Order {
@@ -12,8 +15,8 @@ pub struct Order {
 #[derive(Clone)]
 pub struct OrderData {
     pub market: String,
-    pub qty: u64,
-    pub price: Option<u64>,
+    pub qty: Decimal,
+    pub price: Option<Decimal>,
     pub r#type: TypeOfOrder,
     pub user_id: String,
     pub side: Side,
@@ -27,8 +30,8 @@ impl TryFrom<CreateOrderData> for OrderData {
     fn try_from(value: CreateOrderData) -> Result<Self, Self::Error> {
         Ok(OrderData {
             market: value.market,
-            qty: value.qty.parse()?,
-            price: value.price.map(|p| p.parse()).transpose()?,
+            qty: convert_to_decimal(value.qty),
+            price: value.price.map(|p| convert_to_decimal(p)),
             r#type: value.r#type,
             user_id: value.user_id,
             side: value.side,
@@ -48,6 +51,6 @@ pub struct UpdateBalance {
 }
 
 pub enum BalanceOps {
-    Increase(u64),
-    Decrease(u64)
+    Increase(Decimal),
+    Decrease(Decimal)
 }

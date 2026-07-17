@@ -1,5 +1,6 @@
 use std::collections::VecDeque;
 
+use rust_decimal::Decimal;
 use tokio::sync::mpsc;
 use types::engine::{OrderStatus, Orderbook, Orders, RestingOrder, Side, Trade, TypeOfOrder};
 
@@ -15,7 +16,7 @@ pub async fn match_order(
         Side::SELL => match_against_bids(orderbook, &mut order, tx_channel_market).await,
     };
 
-    if order.qty > 0 && !matches!(order.r#type, TypeOfOrder::MARKET) {
+    if order.qty >  Decimal::from(0) && !matches!(order.r#type, TypeOfOrder::MARKET) {
         order.status = if trades.is_empty() {
             OrderStatus::OPEN
         } else {
@@ -30,7 +31,7 @@ pub async fn match_order(
         let resting_order = orderbook_side
             .entry(order.price.unwrap())
             .or_insert_with(|| RestingOrder {
-                available_qty: 0,
+                available_qty: Decimal::from(0),
                 orders: VecDeque::new(),
             });
 
@@ -76,7 +77,7 @@ async fn match_against_asks(
     let mut trades: Vec<Trade> = Vec::new();
 
     let asks = &mut orderbook.asks;
-    while order.qty != 0 {
+    while order.qty != Decimal::from(0) {
         let Some((&best_price, _)) = asks.iter().next() else {
             break;
         };
@@ -90,7 +91,7 @@ async fn match_against_asks(
         let resting_orders = asks.get_mut(&best_price).unwrap();
 
         while let Some(resting_order) = resting_orders.orders.front_mut() {
-            if order.qty == 0 {
+            if order.qty == Decimal::from(0) {
                 break;
             }
             let fill_qty = order.qty.min(resting_order.qty);
@@ -151,12 +152,12 @@ async fn match_against_asks(
                 })
                 .await;
 
-            if resting_order.qty == 0 {
+            if resting_order.qty == Decimal::from(0) {
                 resting_orders.orders.pop_front();
             }
         }
 
-        if resting_orders.available_qty == 0 {
+        if resting_orders.available_qty == Decimal::from(0) {
             asks.remove(&best_price);
         }
     }
@@ -172,7 +173,7 @@ async fn match_against_bids(
     let mut trades: Vec<Trade> = Vec::new();
 
     let bids = &mut orderbook.bids;
-    while order.qty != 0 {
+    while order.qty != Decimal::from(0) {
         let Some((&best_price, _)) = bids.iter().next() else {
             break;
         };
@@ -185,7 +186,7 @@ async fn match_against_bids(
         let resting_orders = bids.get_mut(&best_price).unwrap();
 
         while let Some(resting_order) = resting_orders.orders.front_mut() {
-            if order.qty == 0 {
+            if order.qty == Decimal::from(0) {
                 break;
             }
             let fill_qty = order.qty.min(resting_order.qty);
@@ -244,12 +245,12 @@ async fn match_against_bids(
                 })
                 .await;
 
-            if resting_order.qty == 0 {
+            if resting_order.qty == Decimal::from(0) {
                 resting_orders.orders.pop_front();
             }
         }
 
-        if resting_orders.available_qty == 0 {
+        if resting_orders.available_qty == Decimal::from(0) {
             bids.remove(&best_price);
         }
     }

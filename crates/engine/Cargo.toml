@@ -10,3 +10,4 @@ dotenvy = { workspace = true }
 types = { package = "types", path = "../types" }
 serde_json = { workspace = true }
 uuid = { workspace = true }
+rust_decimal = "1.42.1"

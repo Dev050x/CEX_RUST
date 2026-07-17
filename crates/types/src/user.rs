@@ -1,8 +1,9 @@
+use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UserBalance {
-    pub available_balance: u64,
-    pub locked_balance: u64,
-    pub reserve_balance: u64,
+    pub available_balance: Decimal,
+    pub locked_balance: Decimal,
+    pub reserve_balance: Decimal,
 }

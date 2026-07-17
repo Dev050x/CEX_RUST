@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, HashMap, VecDeque};
 
+use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
 use crate::user::UserBalance;
@@ -93,13 +94,13 @@ pub struct Depth {
 
 // Orderbook -----------------------------------------------------------------------------------
 pub struct Orderbook {
-    pub bids: BTreeMap<u64, RestingOrder>,
-    pub asks: BTreeMap<u64, RestingOrder>,
-    pub last_traded_price: u64,
+    pub bids: BTreeMap<Decimal, RestingOrder>,
+    pub asks: BTreeMap<Decimal, RestingOrder>,
+    pub last_traded_price: Decimal,
 }
 
 pub struct RestingOrder {
-    pub available_qty: u64,
+    pub available_qty: Decimal,
     pub orders: VecDeque<Orders>,
 }
 
@@ -108,9 +109,9 @@ pub struct Orders {
     pub user_id: String,
     pub market: String,
     pub side: Side,
-    pub qty: u64,
+    pub qty: Decimal,
     pub r#type: TypeOfOrder,
-    pub price: u64,
+    pub price: Decimal,
     pub status: OrderStatus,
 }
 
@@ -128,6 +129,6 @@ pub struct Trade {
     pub taker_order_id: String,
     pub maker_user_id: String,
     pub taker_user_id: String,
-    pub fill_qty: u64,
-    pub price: u64,
+    pub fill_qty: Decimal,
+    pub price: Decimal,
 }
