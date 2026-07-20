@@ -20,6 +20,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
                     .service(orders::onramp)
                     .service(orders::create_order)
                     .service(orders::get_user_balance)
+                    .service(orders::get_order)
             ),
     );
 }
