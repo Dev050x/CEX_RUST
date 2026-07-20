@@ -27,6 +27,10 @@ pub enum CustomError {
     TimeoutError,
     #[display("There is some errro in DB connection")]
     DBError,
+    #[display("Type Conversion Error")]
+    TypeConversionError,
+    #[display("Order Not found")]
+    OrderNotFound
 }
 
 impl ResponseError for CustomError {
@@ -40,6 +44,8 @@ impl ResponseError for CustomError {
             CustomError::WrongJwtToken => StatusCode::UNAUTHORIZED,
             CustomError::TimeoutError => StatusCode::REQUEST_TIMEOUT,
             CustomError::DBError => StatusCode::INTERNAL_SERVER_ERROR,
+            CustomError::TypeConversionError => StatusCode::INTERNAL_SERVER_ERROR,
+            CustomError::OrderNotFound => StatusCode::NOT_FOUND
         }
     }
 

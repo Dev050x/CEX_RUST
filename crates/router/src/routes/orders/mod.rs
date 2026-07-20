@@ -1,10 +1,17 @@
-use actix_web::{HttpResponse, get, post, web};
+use actix_web::{
+    HttpResponse, get, post,
+    web::{self},
+};
 use types::engine::{CreateOrderData, EngineRequest, GetBalanceData, GetDepthData, OnRampData};
 use uuid::Uuid;
 
 use crate::{
     error::CustomError,
-    types::{app::AppState, order::CreateOrderSchema, user::Payload},
+    types::{
+        app::AppState,
+        order::{CreateOrderSchema, GetOrderResponse},
+        user::Payload,
+    },
     utils::send_to_engine,
 };
 
@@ -74,9 +81,7 @@ pub async fn depth(
 }
 
 #[get("/balance")]
-pub async fn get_user_balance(
-    payload: web::ReqData<Payload>,
-) -> Result<HttpResponse, CustomError> {
+pub async fn get_user_balance(payload: web::ReqData<Payload>) -> Result<HttpResponse, CustomError> {
     let inner_payload = payload.into_inner();
     let correlation_id = Uuid::new_v4();
     println!("received get balance request with this userId");
@@ -90,4 +95,47 @@ pub async fn get_user_balance(
         data: get_user_balance_data,
     };
     send_to_engine(correlation_id.to_string(), payload).await
+}
+
+#[get("/order/{order_id}")]
+pub async fn get_order(
+    data: web::Path<String>,
+    _payload: web::ReqData<Payload>,
+    app_state: web::Data<AppState>,
+) -> Result<HttpResponse, CustomError> {
+    let order_id =
+        Uuid::parse_str(&data.into_inner()).map_err(|_| CustomError::TypeConversionError)?;
+
+    let order = sqlx::query!(
+        "SELECT id,
+        price,
+        quantity,
+        side::text as side,
+        type::text as type,
+        user_id,
+        market,
+        status::text as status FROM orders WHERE id = $1",
+        &order_id
+    )
+    .fetch_optional(&app_state.pool)
+    .await
+    .map_err(|_| CustomError::DBError)?;
+
+    let order = match order {
+        Some(order) => order,
+        None => return Err(CustomError::OrderNotFound),
+    };
+
+    let respone = GetOrderResponse {
+        id: order.id.to_string(),
+        quantity: order.quantity,
+        price: order.price,
+        side: order.side.unwrap(),
+        r#type: order.r#type.unwrap(),
+        status: order.status.unwrap(),
+        user_id: order.user_id.to_string(),
+        market: order.market,
+    };
+
+    Ok(HttpResponse::Ok().json(respone))
 }
