@@ -59,7 +59,15 @@ pub struct Depth {
     pub correlation_id: String,
 }
 
+#[derive(Debug)]
+pub struct DeleteOrder {
+    pub correlation_id: String,
+    pub order_id: String,
+    pub market: String
+}
+
 pub enum Request {
     OrderData(Order),
     DepthData(Depth),
+    DeleteOrderData(DeleteOrder)
 }

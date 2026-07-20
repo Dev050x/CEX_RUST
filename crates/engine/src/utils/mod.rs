@@ -1,7 +1,6 @@
 use rust_decimal::Decimal;
 use types::engine::{
-    CreateOrderData, CreateOrderResponseData, Depth, EngineResponse, GetDepthResponseData,
-    OrderStatus, Orderbook, Trade,
+    CancelOrderResponseData, CreateOrderData, CreateOrderResponseData, Depth, EngineResponse, GetDepthResponseData, OrderStatus, Orderbook, Trade,
 };
 
 use crate::store::RedisManager;
@@ -70,6 +69,33 @@ pub fn get_depth(orderbook: &Orderbook) -> Depth {
             .push([price.to_string(), resting_order.available_qty.to_string()]);
     }
     return depth;
+}
+
+pub async fn send_cancel_order_response(
+    correlation_id: String,
+    user_id: String,
+    order_id: String,
+    msg: String,
+    market: String,
+    status: OrderStatus,
+    depth: Option<Depth>,
+) {
+    println!("sending the cancel order response {:?} \n", msg);
+    let _ = RedisManager::get_instance()
+        .await
+        .publish_message(&EngineResponse::CancelOrder {
+            correlation_id,
+            data: CancelOrderResponseData {
+                user_id,
+                order_id,
+                msg,
+                status,
+                depth,
+                market
+            },
+        })
+        .await;
+    return;
 }
 
 pub fn convert_to_decimal(data: String) -> Decimal {

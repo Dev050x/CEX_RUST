@@ -4,7 +4,7 @@ use tokio::sync::mpsc;
 use types::engine::{Market, OrderStatus, Orderbook, Trade};
 
 use crate::{
-    matching::match_order,
+    matching::{delete::delete_order, match_order},
     messages::types::{OrderData, Request, UpdateBalance},
     utils::{convert_to_decimal, get_depth, send_create_order_response, send_get_depth_response},
 };
@@ -51,6 +51,9 @@ pub async fn run_market(
             Request::DepthData(data) => {
                 let depth = get_depth(&orderbook);
                 send_get_depth_response(data.correlation_id, depth).await;
+            }
+            Request::DeleteOrderData(delete_order_data) => {
+                delete_order(&mut orderbook, delete_order_data, &mut tx_channel_market).await;
             }
         }
     }

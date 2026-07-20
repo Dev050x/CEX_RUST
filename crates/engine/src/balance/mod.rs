@@ -6,10 +6,8 @@ use crate::{
     messages::{
         RxChannelsMarket, TxChannelsBalance,
         types::{BalanceOps, UpdateBalance},
-    },
-    services::{
-        create_order::handle_create_order, get_balance::handle_get_balance,
-        get_depth::handle_get_depth, onramp::handle_onramp,
+    }, services::{
+        create_order::handle_create_order, delete_order::handle_delete_order, get_balance::handle_get_balance, get_depth::handle_get_depth, onramp::handle_onramp,
     },
 };
 
@@ -42,6 +40,9 @@ pub async fn balance(
                     }
                     EngineRequest::GetBalance {correlation_id, data} => {
                         handle_get_balance(correlation_id, data, &balances).await;
+                    }
+                    EngineRequest::DeleteOrder {correlation_id, data} => {
+                        handle_delete_order(correlation_id, data, &tx_balance).await;
                     }
                 }
             }

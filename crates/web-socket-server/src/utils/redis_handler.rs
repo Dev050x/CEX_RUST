@@ -55,6 +55,21 @@ async fn process_engine_response(engine_response: EngineResponse, depth_store: &
                 );
             }
         }
+        EngineResponse::CancelOrder {
+            correlation_id: _,
+            data,
+        } => {
+            let mut store = depth_store.write().await;
+            if let Some(depth) = data.depth {
+                store.insert(
+                    data.market,
+                    Depth {
+                        bids: depth.bids,
+                        asks: depth.asks,
+                    },
+                );
+            }
+        }
         _ => {}
     }
 }

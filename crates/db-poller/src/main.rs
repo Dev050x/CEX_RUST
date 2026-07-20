@@ -4,7 +4,7 @@ use sqlx_postgres::PostgresDb;
 use std::time::Duration;
 use types::engine::EngineResponse;
 
-use crate::controllers::handle_create_order;
+use crate::controllers::{handle_create_order, handle_delete_order};
 
 mod controllers;
 mod utils;
@@ -78,6 +78,10 @@ async fn handle_response(data: EngineResponse, conn: &Pool<Postgres>) {
             correlation_id: _,
             data: _,
         } => {}
+        EngineResponse::CancelOrder {
+            correlation_id: _,
+            data,
+        } => handle_delete_order(data, conn).await.unwrap(),
         _ => {}
     }
 }

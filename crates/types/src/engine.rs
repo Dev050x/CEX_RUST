@@ -22,8 +22,12 @@ pub enum EngineRequest {
     },
     GetBalance {
         correlation_id: String,
-        data: GetBalanceData
-    }
+        data: GetBalanceData,
+    },
+    DeleteOrder {
+        correlation_id: String,
+        data: DeleteOrderData,
+    },
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -48,7 +52,14 @@ pub struct GetDepthData {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetBalanceData {
-    pub  user_id: String
+    pub user_id: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct DeleteOrderData {
+    pub user_id: String,
+    pub order_id: String,
+    pub market: String,
 }
 
 // Response TYPE -----------------------------------------------------------------------------------
@@ -69,8 +80,12 @@ pub enum EngineResponse {
     },
     GetBalance {
         correlation_id: String,
-        data: GetBalanceResponseData
-    }
+        data: GetBalanceResponseData,
+    },
+    CancelOrder {
+        correlation_id: String,
+        data: CancelOrderResponseData,
+    },
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -98,7 +113,17 @@ pub struct GetDepthResponseData {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetBalanceResponseData {
-    pub balance: Option<HashMap<String, UserBalance>>
+    pub balance: Option<HashMap<String, UserBalance>>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct CancelOrderResponseData {
+    pub user_id: String,
+    pub order_id: String,
+    pub msg: String,
+    pub market: String,
+    pub status: OrderStatus,
+    pub depth: Option<Depth>,
 }
 
 // Extra Type-----------------------------------------------------------------------------------

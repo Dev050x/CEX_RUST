@@ -1,8 +1,10 @@
 use actix_web::{
-    HttpResponse, get, post,
+    HttpResponse, delete, get, post,
     web::{self},
 };
-use types::engine::{CreateOrderData, EngineRequest, GetBalanceData, GetDepthData, OnRampData};
+use types::engine::{
+    CreateOrderData, DeleteOrderData, EngineRequest, GetBalanceData, GetDepthData, OnRampData,
+};
 use uuid::Uuid;
 
 use crate::{
@@ -138,4 +140,52 @@ pub async fn get_order(
     };
 
     Ok(HttpResponse::Ok().json(respone))
+}
+
+#[delete("/order/{order_id}")]
+pub async fn delete_order(
+    data: web::Path<String>,
+    payload: web::ReqData<Payload>,
+    app_state: web::Data<AppState>,
+) -> Result<HttpResponse, CustomError> {
+    let order_id = data.into_inner();
+    let inner_payload = payload.into_inner();
+    let correlation_id = Uuid::new_v4();
+
+    let order = sqlx::query!(
+        "SELECT id,
+        price,
+        quantity,
+        side::text as side,
+        type::text as type,
+        user_id,
+        market,
+        status::text as status FROM orders WHERE id = $1",
+        &Uuid::parse_str(&order_id).unwrap()
+    )
+    .fetch_optional(&app_state.pool)
+    .await
+    .map_err(|_| CustomError::DBError)?;
+
+    let order = match order {
+        Some(order) => order,
+        None => return Err(CustomError::OrderNotFound),
+    };
+
+    if matches!(order.status.as_deref(), Some("filled" | "cancelled")) {
+        return Err(CustomError::OrderAlreadyCancelledOrFilled);
+    }
+
+    let delete_order_data = DeleteOrderData {
+        user_id: inner_payload.user_id,
+        order_id: order_id,
+        market: order.market,
+    };
+
+    let payload = EngineRequest::DeleteOrder {
+        correlation_id: correlation_id.to_string(),
+        data: delete_order_data,
+    };
+
+    send_to_engine(correlation_id.to_string(), payload).await
 }

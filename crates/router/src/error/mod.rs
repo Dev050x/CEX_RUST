@@ -30,7 +30,9 @@ pub enum CustomError {
     #[display("Type Conversion Error")]
     TypeConversionError,
     #[display("Order Not found")]
-    OrderNotFound
+    OrderNotFound,
+    #[display("order already cancelled or filled")]
+    OrderAlreadyCancelledOrFilled
 }
 
 impl ResponseError for CustomError {
@@ -45,7 +47,8 @@ impl ResponseError for CustomError {
             CustomError::TimeoutError => StatusCode::REQUEST_TIMEOUT,
             CustomError::DBError => StatusCode::INTERNAL_SERVER_ERROR,
             CustomError::TypeConversionError => StatusCode::INTERNAL_SERVER_ERROR,
-            CustomError::OrderNotFound => StatusCode::NOT_FOUND
+            CustomError::OrderNotFound => StatusCode::NOT_FOUND,
+            CustomError::OrderAlreadyCancelledOrFilled => StatusCode::NOT_ACCEPTABLE
         }
     }
 

@@ -5,6 +5,7 @@ use tokio::sync::mpsc;
 use types::engine::{OrderStatus, Orderbook, Orders, RestingOrder, Side, Trade, TypeOfOrder};
 
 use crate::messages::types::{BalanceOps, OrderData, UpdateBalance};
+pub mod delete;
 
 pub async fn match_order(
     orderbook: &mut Orderbook,
