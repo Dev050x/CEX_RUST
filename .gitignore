@@ -2,3 +2,6 @@
 .env
 *fish
 logs/
+.codegraph
+.rtk
+CLAUDE.md
