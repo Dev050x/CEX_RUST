@@ -13,7 +13,11 @@ pub async fn depth_push_interval(depth_store: DepthStore, client_registery: Clie
         for client in clients.iter() {
             if let Some(market_depth) = store.get(&client.market) {
                 let payload = serde_json::json!({
-                    "depth": market_depth
+                    "data" : {
+                        "type" : "depth",
+                        "bids": &market_depth.bids,
+                        "asks": market_depth.asks
+                    }
                 });
                 let text = payload.to_string();
                 let mut w = client.write.lock().await;
